@@ -1,0 +1,113 @@
+.root {
+    -text-primary: #5f4d3e;
+    -text-secondary: #a48e7c;
+    -text-primary-hover: #6E5C4D;
+    -text-primary-active: #4F3D2E;
+    -background-primary: #F2EFE8;
+    -header-color: #d5c6ad;
+
+    -color-accent-0: #F9F6F1;
+    -color-accent-1: #F2EDE1;
+    -color-accent-2: #EAD7C3;
+    -color-accent-3: #DFC6A8;
+    -color-accent-4: #D2B18C;
+    -color-accent-5: #B6976F;
+    -color-accent-6: #997C54;
+    -color-accent-7: #7D6344;
+    -color-accent-8: #624C36;
+    -color-accent-9: #483829;
+
+    -color-accent-fg: #5f4d3e;
+    -color-accent-emphasis: #d5c6ad;
+    -color-accent-muted: rgba(159, 125, 98, 0.4);
+    -color-accent-subtle: #EAD7C3;
+}
+
+.header-tab-pane {
+    -fx-background-color: -header-color;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: transparent transparent #a48e7c transparent;
+}
+
+.header-tab-pane .tab {
+    -fx-background-color: none;
+    -fx-text-fill: -text-primary;
+}
+
+.header-tab-pane .tab:hover {
+    -fx-border-width: 0 0 2px 0;
+    -fx-text-fill: -text-primary-hover;
+    -fx-border-color: transparent transparent #998a7d transparent;
+    -fx-cursor: hand;
+}
+
+.header-tab-pane .tab-inactive {
+    -fx-border-width: 0 0 0px 0;
+    -fx-border-color: transparent transparent transparent transparent;
+}
+
+.header-tab-pane .tab-active {
+    -fx-border-width: 0 0 1px 0;
+    -fx-text-fill: -text-primary-active;
+    -fx-border-color: transparent transparent #6E5C4D transparent;
+}
+
+.header-tab-pane .label {
+    -fx-text-fill: -text-primary;
+}
+
+.page {
+    -fx-background-color: -background-primary;
+}
+
+.table-view {
+    -fx-background-color: #F2EFE8;
+    -fx-border-color: -color-accent-emphasis;
+    -fx-border-width: 2px;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: -color-accent-emphasis;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -text-primary;
+    -fx-font-weight: normal;
+    -fx-font-size: 14px;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #F3EDE4;
+}
+
+.table-row-cell:even {
+    -fx-background-color: #ece4da;
+}
+
+.table-cell {
+    -fx-font-size: 14px;
+    -fx-text-fill: #5f4d3e;
+}
+
+.table-view:focused .table-row-cell:filled:focused {
+    -fx-background-color: #e5d9cb;
+}
+
+.table-view:focused .table-row-cell:filled:hover {
+    -fx-background-color: #e5d9cb;
+}
+
+.stats-icon {
+    -fx-stroke: #d7cccc;
+}
+
+.modal-box {
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.cursor-hand {
+    -fx-cursor: hand;
+}
