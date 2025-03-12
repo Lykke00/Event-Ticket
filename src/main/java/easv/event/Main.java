@@ -1,11 +1,14 @@
 package easv.event;
 
 import atlantafx.base.theme.PrimerLight;
+import easv.event.gui.pages.Pages;
 import easv.event.gui.utils.ModalHandler;
+import easv.event.gui.utils.NotificationHandler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -20,23 +23,13 @@ public class Main extends Application {
     public void start(Stage stage) throws IOException {
         Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/main.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource(Pages.LOGIN.getPath()));
         Parent root = fxmlLoader.load();
 
-        // StackPane bruges grundet ModalPane, så vi kan vise
-        // modals samt evt. notifikationer i fremtiden
-        StackPane stackPane = new StackPane(root);
-
-        // Tilføj CSS til root (stackpane)
-        String css = getClass().getResource("/css/main.css").toExternalForm();
-        stackPane.getStylesheets().add(css);
-
-        // Send vores StackPane videre til MainController
-        // så vi kan håndtere modals
-        ModalHandler.getInstance().setRoot(stackPane);
-
-        Scene scene = new Scene(stackPane, WIDTH, HEIGHT);
+        Scene scene = new Scene(root);
         stage.setTitle(TITLE);
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/favicon.png")));
+
         stage.setScene(scene);
         stage.show();
     }

@@ -1,7 +1,7 @@
 package easv.event.gui;
 
 import easv.event.gui.utils.PageHandler;
-import easv.event.gui.utils.Pages;
+import easv.event.gui.pages.Pages;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;

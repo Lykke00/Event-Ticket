@@ -21,6 +21,9 @@
     -color-accent-emphasis: #d5c6ad;
     -color-accent-muted: rgba(159, 125, 98, 0.4);
     -color-accent-subtle: #EAD7C3;
+
+    -color-border-muted: rgba(159, 125, 98, 0.4);
+    -color-border-default: rgba(159, 125, 98, 0.4);
 }
 
 .header-tab-pane {
@@ -110,4 +113,15 @@
 
 .cursor-hand {
     -fx-cursor: hand;
+}
+
+.header-login {
+    -fx-text-fill: -text-primary;
+}
+
+.btn-login {
+    -fx-background-color: -color-accent-5;
+    -fx-text-fill: -text-primary;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
 }

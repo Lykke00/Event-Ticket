@@ -3,6 +3,7 @@ package easv.event.gui.utils;
 import atlantafx.base.controls.ModalPane;
 import atlantafx.base.layout.ModalBox;
 import atlantafx.base.theme.Styles;
+import easv.event.gui.modals.Modal;
 import javafx.animation.Animation;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -10,22 +11,29 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Control;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Wrapper for ModalPane to fix animations only happening once during its lifetime.
  */
 public class ModalOverlay extends ModalPane {
+    private Object controller;
+
+    private final Map<Modal, Node> modalCache = new HashMap<>();
+
     public ModalOverlay() {
         super();
+
         // Animate when clicking bg to close
         this.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
             Node target = event.getTarget() instanceof Node ? (Node) event.getTarget() : null;
             // Hvis det er en scrollpane og har styleclassen scrollable-content
-            System.out.println(event.getTarget().toString());
             boolean isStackPane = target instanceof StackPane;
             if (isStackPane && target.getStyleClass().contains("scrollable-content") ||
                 isStackPane && target.getStyleClass().contains("close-button") ||
@@ -50,29 +58,34 @@ public class ModalOverlay extends ModalPane {
         outAnimation.play();
     }
 
-    public void showFXML(String fxmlPath) {
-        displayModal(fxmlPath);
+    public void showFXML(Modal modal) {
+        displayModal(modal);
     }
 
+    private void displayModal(Modal modal) {
+        FXMLLoader loader;
+        Node modalNode = modalCache.get(modal);
 
-    private void displayModal(String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent modalContent = loader.load();
-
-            ModalBox modalBox = new ModalBox();
-
-            modalBox.addContent(modalContent);
-            modalBox.setMaxSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-
-            modalBox.getStyleClass().add("modal-box");
-
-            show(modalBox);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (modalNode == null) {
+            loader = new FXMLLoader(getClass().getResource(modal.getPath()));
+            try {
+                modalNode = loader.load();
+                modal.setController(loader.getController());
+                modalCache.put(modal, modalNode);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to load Modal: " + modal.getPath(), e);
+            }
         }
-    }
 
+        ModalBox modalBox = new ModalBox();
+
+        modalBox.getStyleClass().add("modal-box");
+
+        modalBox.addContent(modalNode);
+        modalBox.setMaxSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+
+        show(modalBox);
+    }
 
     @Override
     public void hide(boolean clear) {

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="174.0" prefWidth="306.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.event.gui.modals.EventAssign.EventAssignController">
+   <children>
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" mouseTransparent="true" prefHeight="53.0" prefWidth="236.0" VBox.vgrow="NEVER">
+         <children>
+            <Label text="Tildel koordinator">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <Label fx:id="labelDescription" text="Tilføj en eller flere koordinatore på event" textFill="#545454" />
+         </children>
+      </VBox>
+      <Separator prefHeight="16.0" prefWidth="236.0" />
+      <VBox prefHeight="52.0" prefWidth="286.0" spacing="10.0">
+         <children>
+            <VBox fx:id="vBoxEvent">
+               <children>
+                  <Label text="Koordinatore" />
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+      <HBox alignment="CENTER" prefHeight="48.0" prefWidth="286.0" spacing="20.0">
+         <children>
+            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#btnCancelAssign" text="Annuller" HBox.hgrow="ALWAYS" />
+            <Button fx:id="btnAssign" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#btnActionAssign" prefHeight="25.0" prefWidth="70.0" text="Tildel" HBox.hgrow="ALWAYS" />
+         </children>
+         <VBox.margin>
+            <Insets top="10.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

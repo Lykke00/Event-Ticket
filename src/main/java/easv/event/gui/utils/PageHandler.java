@@ -1,9 +1,9 @@
 package easv.event.gui.utils;
 
+import easv.event.gui.pages.Pages;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,6 @@ public class PageHandler {
     private Pages currentPage;
 
     private BorderPane borderPane;
-    private StackPane root;
 
     private PageHandler() {}
 
@@ -44,7 +43,7 @@ public class PageHandler {
             loader = new FXMLLoader(getClass().getResource(page.getPath()));
             try {
                 pageNode = loader.load();
-                page.setController(loader.getController()); // Store controller in Pages enum
+                page.setController(loader.getController());
                 pageCache.put(page, pageNode);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to load page: " + page.getPath(), e);
