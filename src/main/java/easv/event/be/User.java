@@ -1,13 +1,13 @@
 package easv.event.be;
 
-public class Users {
+public class User {
     private int id;
     private String firstName;
     private String lastName;
     private String email;
     private String role;
 
-    public Users(int id, String firstName, String lastName, String email, String role) {
+    public User(int id, String firstName, String lastName, String email, String role) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -15,7 +15,7 @@ public class Users {
         this.role = role;
     }
 
-    public Users(String firstName, String lastName, String email, String role) {
+    public User(String firstName, String lastName, String email, String role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;

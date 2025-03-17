@@ -1,17 +1,17 @@
 package easv.event.be;
 
-public class Tickets {
+public class Ticket {
     private int id;
     private String name;
     private int type;
 
-    public Tickets(int id, String name, int type) {
+    public Ticket(int id, String name, int type) {
         this.id = id;
         this.name = name;
         this.type = type;
     }
 
-    public Tickets(int type, String name) {
+    public Ticket(int type, String name) {
         this.type = type;
         this.name = name;
     }

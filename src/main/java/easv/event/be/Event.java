@@ -2,7 +2,7 @@ package easv.event.be;
 
 import java.time.LocalDate;
 
-public class Events {
+public class Event {
     private int id;
     private String title;
     private String description;
@@ -10,7 +10,7 @@ public class Events {
     private String startsAt;
     private String location;
 
-    public Events(int id, String title, String description, LocalDate date, String startsAt, String location) {
+    public Event(int id, String title, String description, LocalDate date, String startsAt, String location) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -19,7 +19,7 @@ public class Events {
         this.location = location;
     }
 
-    public Events(String location, String startsAt, LocalDate date, String description, String title) {
+    public Event(String location, String startsAt, LocalDate date, String description, String title) {
         this.location = location;
         this.startsAt = startsAt;
         this.date = date;
