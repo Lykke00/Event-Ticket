@@ -1,4 +1,4 @@
-package easv.event.BE;
+package easv.event.be;
 
 import java.time.LocalDate;
 
