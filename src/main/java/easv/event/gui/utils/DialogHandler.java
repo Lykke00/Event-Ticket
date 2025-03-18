@@ -1,6 +1,7 @@
 package easv.event.gui.utils;
 
 import easv.event.gui.pages.Login.LoginController;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -60,34 +61,36 @@ public class DialogHandler {
         alert.showAndWait();
     }
 
-    public static void showExceptionError(Scene scene, String title, String message, Exception exception) {
-        var alert = new Alert(Alert.AlertType.ERROR);
+    public static void showExceptionError(String title, String message, Exception exception) {
+        Platform.runLater(() -> {
+            var alert = new Alert(Alert.AlertType.ERROR);
 
-        Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
-        alertStage.getIcons().add(new Image(LoginController.class.getResourceAsStream("/images/favicon.png")));
-        alert.setTitle(title);
-        alert.setHeaderText(title);
-        alert.setContentText(message);
+            Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
+            alertStage.getIcons().add(new Image(LoginController.class.getResourceAsStream("/images/favicon.png")));
 
-        var stringWriter = new StringWriter();
-        var printWriter = new PrintWriter(stringWriter);
-        exception.printStackTrace(printWriter);
+            alert.setTitle(title);
+            alert.setHeaderText(title);
+            alert.setContentText(message);
 
-        var textArea = new TextArea(stringWriter.toString());
-        textArea.setEditable(false);
-        textArea.setWrapText(false);
-        textArea.setMaxWidth(Double.MAX_VALUE);
-        textArea.setMaxHeight(Double.MAX_VALUE);
-        GridPane.setVgrow(textArea, Priority.ALWAYS);
-        GridPane.setHgrow(textArea, Priority.ALWAYS);
+            var stringWriter = new StringWriter();
+            var printWriter = new PrintWriter(stringWriter);
+            exception.printStackTrace(printWriter);
 
-        var content = new GridPane();
-        content.setMaxWidth(Double.MAX_VALUE);
-        content.add(new Label("Fuld stacktrace:"), 0, 0);
-        content.add(textArea, 0, 1);
+            var textArea = new TextArea(stringWriter.toString());
+            textArea.setEditable(false);
+            textArea.setWrapText(false);
+            textArea.setMaxWidth(Double.MAX_VALUE);
+            textArea.setMaxHeight(Double.MAX_VALUE);
+            GridPane.setVgrow(textArea, Priority.ALWAYS);
+            GridPane.setHgrow(textArea, Priority.ALWAYS);
 
-        alert.getDialogPane().setExpandableContent(content);
-        alert.initOwner(scene.getWindow());
-        alert.showAndWait();
+            var content = new GridPane();
+            content.setMaxWidth(Double.MAX_VALUE);
+            content.add(new Label("Full stacktrace:"), 0, 0);
+            content.add(textArea, 0, 1);
+
+            alert.getDialogPane().setExpandableContent(content);
+            alert.showAndWait();
+        });
     }
 }

@@ -12,11 +12,12 @@ import easv.event.gui.pages.Event.EventModel;
 import easv.event.gui.pages.Ticket.ItemView.TicketItemViewModel;
 import easv.event.gui.pages.Ticket.TicketModel;
 import easv.event.gui.pages.Users.UsersModel;
+import easv.event.gui.utils.DialogHandler;
 
 public class MainModel {
     private final static MainModel instance = new MainModel();
 
-    private final EventInteractor eventInteractor;
+    private EventInteractor eventInteractor;
     private final EventItemPageModel eventItemModel;
 
     private final EditEventModel editEventModel;
@@ -34,7 +35,12 @@ public class MainModel {
     private final EventAssignModel eventAssignModel;
 
     private MainModel() {
-        eventInteractor = new EventInteractor();
+        try {
+            eventInteractor = new EventInteractor();
+        } catch (Exception e) {
+            DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke oprette forbindelse til databasen", e);
+        }
+
         editEventModel = new EditEventModel();
         eventItemModel = new EventItemPageModel();
 

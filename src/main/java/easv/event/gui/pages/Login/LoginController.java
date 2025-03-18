@@ -65,7 +65,7 @@ public class LoginController {
             stage.show();
 
         } catch (Exception e) {
-            DialogHandler.showExceptionError(btnContinue.getScene(), "Hovsa, fejl!", "Der er desværre sket en fejl, kopier stacktrace og send det til en administrator.", e);
+            DialogHandler.showExceptionError("Hovsa, fejl!", "Der er desværre sket en fejl, kopier stacktrace og send det til en administrator.", e);
         }
     }
 

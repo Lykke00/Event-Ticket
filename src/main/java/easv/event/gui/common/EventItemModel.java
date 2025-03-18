@@ -1,5 +1,6 @@
 package easv.event.gui.common;
 
+import easv.event.be.Event;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,40 +21,25 @@ public class EventItemModel {
 
     private final ObservableList<UserModel> coordinators = FXCollections.observableArrayList();
 
-    public EventItemModel(int id, String name, String location, int soldTickets, String time, String date) {
+    public EventItemModel(int id, String name, String description, String location, int soldTickets, String time, LocalDate date) {
         this.id.set(id);
         this.name.set(name);
+        this.description.set(description);
         this.location.set(location);
         this.soldTickets.set(soldTickets);
         this.time.set(time);
-
-        LocalDate parsedDate;
-        try {
-            parsedDate = LocalDate.parse(date);
-        } catch (Exception e) {
-            parsedDate = LocalDate.now();
-        }
-
-        this.date.set(parsedDate);
-        this.description.set(generateRandomString(100));
+        this.date.set(date);
     }
 
-    public EventItemModel(int id, String name, String location, int soldTickets, String time, String date, ObservableList<UserModel> coordinators) {
+    public EventItemModel(int id, String name, String description, String location, int soldTickets, String time, LocalDate date, ObservableList<UserModel> coordinators) {
         this.id.set(id);
         this.name.set(name);
+        this.description.set(description);
         this.location.set(location);
         this.soldTickets.set(soldTickets);
         this.time.set(time);
 
-        LocalDate parsedDate;
-        try {
-            parsedDate = LocalDate.parse(date);
-        } catch (Exception e) {
-            parsedDate = LocalDate.now();
-        }
-
-        this.date.set(parsedDate);
-        this.description.set(generateRandomString(100));
+        this.date.set(date);
         this.coordinators.addAll(coordinators);
     }
 
@@ -89,21 +75,18 @@ public class EventItemModel {
         return coordinators;
     }
 
+    public static EventItemModel fromEntity(Event event) {
+        return new EventItemModel(event.getId(), event.getTitle(), event.getDescription(), event.getLocation(), event.getSoldTickets(), event.getStartsAt(), event.getDate());
+    }
+
+    public static Event toEntity(EventItemModel eventItemModel) {
+        return new Event(eventItemModel.nameProperty().get(), eventItemModel.descriptionProperty().get(), eventItemModel.dateProperty().get(), eventItemModel.timeProperty().get(), eventItemModel.locationProperty().get());
+    }
+
     @Override
     public String toString() {
         return name.get();
     }
 
-    public static String generateRandomString(int length) {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        Random random = new Random();
-        StringBuilder result = new StringBuilder(length);
 
-        for (int i = 0; i < length; i++) {
-            int index = random.nextInt(characters.length());
-            result.append(characters.charAt(index));
-        }
-
-        return result.toString();
-    }
 }

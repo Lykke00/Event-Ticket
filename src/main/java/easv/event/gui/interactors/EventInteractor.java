@@ -1,23 +1,52 @@
 package easv.event.gui.interactors;
 
+import easv.event.be.Event;
 import easv.event.bll.EventManager;
 import easv.event.gui.common.EventItemModel;
 import easv.event.gui.pages.Event.EventModel;
+import easv.event.gui.utils.BackgroundTaskExecutor;
+import easv.event.gui.utils.DialogHandler;
+import javafx.concurrent.Task;
+
+import java.util.List;
 
 public class EventInteractor {
     private final EventModel eventModel;
     private final EventManager eventManager;
 
-    public EventInteractor() {
+    public EventInteractor() throws Exception {
         this.eventModel = new EventModel();
         this.eventManager = new EventManager();
 
+        initialize();
+    }
+
+    public void initialize() {
         setEventsForUser();
     }
 
     public void setEventsForUser() {
-        //eventModel.eventsListProperty().setAll();
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        return eventManager.getEventsForUser(1); //TODO: Skal være efter logget ind bruger
+                    } catch (Exception e) {
+                        throw new RuntimeException("En fejl skete ved at prøve og hente Events for bruger", e);
+                    }
+                },
+                eventsForUser -> {
+                    List<EventItemModel> eventItemModels = eventsForUser.stream()
+                            .map(EventItemModel::fromEntity)
+                            .toList();
+                    eventModel.eventsListProperty().setAll(eventItemModels);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke hente data for bruger", exception);
+                }
+        );
     }
+
+
 
     public EventItemModel getEventFromId(int id) {
         return eventModel.eventsListProperty().stream()

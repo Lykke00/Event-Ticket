@@ -1,6 +1,8 @@
 package easv.event.be;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Event {
     private int id;
@@ -9,6 +11,10 @@ public class Event {
     private LocalDate date;
     private String startsAt;
     private String location;
+
+    private int soldTickets = 0;
+    private List<User> coordinators = new ArrayList<>();
+
 
     public Event(int id, String title, String description, LocalDate date, String startsAt, String location) {
         this.id = id;
@@ -73,6 +79,14 @@ public class Event {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public int getSoldTickets() {
+        return soldTickets;
+    }
+
+    public void setSoldTickets(int soldTickets) {
+        this.soldTickets = soldTickets;
     }
 
     @Override

@@ -16,47 +16,6 @@ public class TestData {
     private static final ObservableList<TicketItemModel> tickets = FXCollections.observableArrayList();
     private static final ObservableList<TicketEventItemModel> ticketsEvents = FXCollections.observableArrayList();
 
-    public static ObservableList<EventItemModel> eventItems() {
-        ObservableList<UserModel> coordinators = userTestData();
-        Random random = new Random();
-
-        if (events.isEmpty()) {
-            events.add(createEvent(1, "Concert A", "Esbjerg", 120, "17:00", "2025-02-13", coordinators, random));
-            events.add(createEvent(2, "Festival B", "Aarhus", 300, "18:00", "2025-02-14", coordinators, random));
-            events.add(createEvent(3, "Theater C", "Copenhagen", 50, "19:30", "2025-02-15", coordinators, random));
-            events.add(createEvent(4, "Conference D", "Odense", 200, "09:00", "2025-02-16", coordinators, random));
-            events.add(createEvent(5, "Sports Event E", "Aalborg", 150, "16:30", "2025-02-17", coordinators, random));
-            events.add(createEvent(6, "Music Festival F", "Esbjerg", 500, "12:00", "2025-02-18", coordinators, random));
-            events.add(createEvent(7, "Exhibition G", "Aarhus", 70, "14:00", "2025-02-19", coordinators, random));
-            events.add(createEvent(8, "Comedian H", "Copenhagen", 80, "21:00", "2025-02-20", coordinators, random));
-            events.add(createEvent(9, "Workshop I", "Odense", 40, "10:00", "2025-02-21", coordinators, random));
-            events.add(createEvent(10, "Talk J", "Aalborg", 90, "11:30", "2025-02-22", coordinators, random));
-            events.add(createEvent(11, "Concert K", "Esbjerg", 200, "20:00", "2025-02-23", coordinators, random));
-            events.add(createEvent(12, "Festival L", "Aarhus", 350, "18:00", "2025-02-24", coordinators, random));
-            events.add(createEvent(13, "Play M", "Copenhagen", 60, "19:00", "2025-02-25", coordinators, random));
-            events.add(createEvent(14, "Summit N", "Odense", 180, "09:30", "2025-02-26", coordinators, random));
-            events.add(createEvent(15, "Football Match O", "Aalborg", 220, "16:00", "2025-02-27", coordinators, random));
-            events.add(createEvent(16, "Rock Concert P", "Esbjerg", 150, "21:30", "2025-02-28", coordinators, random));
-            events.add(createEvent(17, "Dance Show Q", "Aarhus", 100, "18:30", "2025-03-01", coordinators, random));
-            events.add(createEvent(18, "Product Launch R", "Copenhagen", 60, "13:00", "2025-03-02", coordinators, random));
-            events.add(createEvent(19, "Tech Conference S", "Odense", 250, "09:00", "2025-03-03", coordinators, random));
-            events.add(createEvent(20, "Art Exhibition T", "Aalborg", 110, "15:30", "2025-03-04", coordinators, random));
-        }
-        return events;
-    }
-
-    private static EventItemModel createEvent(int id, String name, String location, int duration, String time, String date, ObservableList<UserModel> coordinators, Random random) {
-        List<UserModel> shuffledCoordinators = new ArrayList<>(coordinators);
-        Collections.shuffle(shuffledCoordinators);
-
-        int numberOfCoordinators = random.nextInt(6) + 1;
-        List<UserModel> selectedCoordinators = shuffledCoordinators.subList(0, Math.min(numberOfCoordinators, shuffledCoordinators.size()));
-
-        ObservableList<UserModel> observableSelectedCoordinators = FXCollections.observableArrayList(selectedCoordinators);
-
-        return new EventItemModel(id, name, location, duration, time, date, observableSelectedCoordinators);
-    }
-
     public static ObservableList<TicketItemModel> ticketTestData() {
         if (ticketsEvents.isEmpty()) {
             ticketsEvents.add(new TicketEventItemModel(1, "Concert A", 100));
