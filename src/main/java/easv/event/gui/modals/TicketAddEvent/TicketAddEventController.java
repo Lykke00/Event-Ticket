@@ -5,6 +5,7 @@ import easv.event.gui.MainModel;
 import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.TicketEventItemModel;
 import easv.event.gui.common.TicketItemModel;
+import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.pages.Event.EventModel;
 import easv.event.gui.pages.Ticket.ItemView.TicketItemViewModel;
 import easv.event.gui.utils.ModalHandler;
@@ -25,7 +26,9 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class TicketAddEventController implements Initializable {
-    private EventModel eventModel = MainModel.getInstance().getEventModel();
+    private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
+    private final EventModel eventModel = eventInteractor.getEventModel();
+
     private TicketItemViewModel ticketItemModel;
 
     @FXML

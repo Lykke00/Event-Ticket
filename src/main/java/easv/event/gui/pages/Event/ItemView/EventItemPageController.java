@@ -6,6 +6,7 @@ import atlantafx.base.theme.Styles;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.UserModel;
+import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.modals.Modal;
 import easv.event.gui.pages.Pages;
 import easv.event.gui.utils.DateFormatter;
@@ -32,6 +33,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class EventItemPageController implements Initializable {
+    private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
     private final EventItemPageModel eventItemPageModel;
 
     @FXML
@@ -108,7 +110,7 @@ public class EventItemPageController implements Initializable {
                 "Bekræft slet af " + eventItemModel.nameProperty().get(),
                 "Bemærk, hvis du sletter dette, er eventet \"" + eventItemModel.nameProperty().get() + "\" væk for altid. \n\nEr du sikker på at du vil fortsætte?",
                 () -> {
-                        MainModel.getInstance().getEventModel().deleteEvent(eventItemModel);
+                        eventInteractor.deleteEvent(eventItemModel);
                         PageHandler.getInstance().setCurrentPage(Pages.EVENT);
                     })
                 );

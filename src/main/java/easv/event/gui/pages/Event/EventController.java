@@ -6,6 +6,7 @@ import atlantafx.base.controls.Tile;
 import atlantafx.base.theme.Styles;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.EventItemModel;
+import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.modals.Modal;
 import easv.event.gui.pages.Pages;
 import easv.event.gui.utils.*;
@@ -30,7 +31,9 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class EventController implements Initializable {
-    private final EventModel model = MainModel.getInstance().getEventModel();
+    private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
+    private final EventModel model = eventInteractor.getEventModel();
+
     private SortedList<EventItemModel> sortedEventsList;
     private FilteredList<EventItemModel> filteredEventsList;
 

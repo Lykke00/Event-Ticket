@@ -1,6 +1,7 @@
 package easv.event.gui;
 
 import easv.event.gui.common.EventItemModel;
+import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.modals.EditEvent.EditEventModel;
 import easv.event.gui.modals.EditTicket.EditTicketModel;
 import easv.event.gui.modals.EventAssign.EventAssignModel;
@@ -15,7 +16,7 @@ import easv.event.gui.pages.Users.UsersModel;
 public class MainModel {
     private final static MainModel instance = new MainModel();
 
-    private final EventModel eventModel;
+    private final EventInteractor eventInteractor;
     private final EventItemPageModel eventItemModel;
 
     private final EditEventModel editEventModel;
@@ -33,7 +34,7 @@ public class MainModel {
     private final EventAssignModel eventAssignModel;
 
     private MainModel() {
-        eventModel = new EventModel();
+        eventInteractor = new EventInteractor();
         editEventModel = new EditEventModel();
         eventItemModel = new EventItemPageModel();
 
@@ -49,7 +50,6 @@ public class MainModel {
         eventAssignModel = new EventAssignModel();
 
         // test
-        eventModel.eventsListProperty().addAll(TestData.eventItems());
         ticketModel.ticketItemModelsListProperty().addAll(TestData.ticketTestData());
         usersModel.usersModelObservableList().addAll(TestData.userTestData());
     }
@@ -58,15 +58,8 @@ public class MainModel {
         return instance;
     }
 
-    public EventModel getEventModel() {
-        return eventModel;
-    }
-
-    public EventItemModel getEventFromId(int id) {
-        return eventModel.eventsListProperty().stream()
-                .filter(event -> event.idProperty().get() == id)
-                .findFirst()
-                .orElse(null);
+    public EventInteractor getEventInteractor() {
+        return eventInteractor;
     }
 
     public EventItemPageModel getEventItemModel() {

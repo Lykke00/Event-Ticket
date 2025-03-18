@@ -3,6 +3,7 @@ package easv.event.gui.modals.NewEvent;
 import atlantafx.base.controls.MaskTextField;
 import atlantafx.base.theme.Styles;
 import easv.event.gui.MainModel;
+import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.pages.Event.EventModel;
 import easv.event.gui.utils.ModalHandler;
 import javafx.beans.binding.BooleanBinding;
@@ -27,7 +28,7 @@ import java.util.ResourceBundle;
 import static easv.event.gui.utils.DateFormatter.createLocalDateConverter;
 
 public class AddNewEventController implements Initializable {
-    private final EventModel eventModel = MainModel.getInstance().getEventModel();
+    private final EventInteractor eventInterator = MainModel.getInstance().getEventInteractor();
     private final static ModalHandler modalHandler = ModalHandler.getInstance();
 
     @FXML
@@ -128,7 +129,7 @@ public class AddNewEventController implements Initializable {
 
     @FXML
     private void btnActionCreateEvent(ActionEvent actionEvent) {
-        eventModel.addEvent(1, txtFieldName.getText(), txtFieldLocation.getText(), maskTxtFieldTime.getText(), datePickr.getValue().toString());
+        //eventModel.addEvent(1, txtFieldName.getText(), txtFieldLocation.getText(), maskTxtFieldTime.getText(), datePickr.getValue().toString());
 
         modalHandler.hideModal();
     }

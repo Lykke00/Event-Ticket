@@ -7,6 +7,7 @@ import easv.event.gui.MainModel;
 import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.TicketEventItemModel;
 import easv.event.gui.common.TicketItemModel;
+import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.modals.Modal;
 import easv.event.gui.pages.Pages;
 import easv.event.gui.utils.DialogHandler;
@@ -31,6 +32,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class TicketItemViewController implements Initializable {
+    private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
 
     @FXML
     private Card cardTicketInfo;
@@ -250,7 +252,7 @@ public class TicketItemViewController implements Initializable {
     }
 
     private void goToEvent(TicketEventItemModel item) {
-        EventItemModel eventItemModel = MainModel.getInstance().getEventFromId(item.eventIdProperty().get());
+        EventItemModel eventItemModel = eventInteractor.getEventFromId(item.eventIdProperty().get());
 
         if (eventItemModel == null)
             return;
