@@ -11,6 +11,12 @@ public class EventInteractor {
     public EventInteractor() {
         this.eventModel = new EventModel();
         this.eventManager = new EventManager();
+
+        setEventsForUser();
+    }
+
+    public void setEventsForUser() {
+        //eventModel.eventsListProperty().setAll();
     }
 
     public EventItemModel getEventFromId(int id) {
