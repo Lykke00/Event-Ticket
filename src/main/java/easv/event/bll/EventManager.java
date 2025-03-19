@@ -25,4 +25,12 @@ public class EventManager {
     public List<Event> getEventsForUser(int userId) throws Exception {
         return eventDAO.getEventsForUser(userId);
     }
+
+    public boolean deleteEvent(Event event) throws Exception {
+        return eventDAO.deleteEvent(event);
+    }
+
+    public List<User> getCoordinatorsForEvent(Event event) throws Exception {
+        return eventDAO.getCoordinatorsForEvent(event);
+    }
 }

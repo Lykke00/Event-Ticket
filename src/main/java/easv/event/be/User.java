@@ -6,13 +6,15 @@ public class User {
     private String lastName;
     private String email;
     private String role;
+    private String location;
 
-    public User(int id, String firstName, String lastName, String email, String role) {
+    public User(int id, String firstName, String lastName, String email, String role, String location) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.role = role;
+        this.location = location;
     }
 
     public User(String firstName, String lastName, String email, String role) {
@@ -60,6 +62,10 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getLocation() {
+        return location;
     }
 
     @Override

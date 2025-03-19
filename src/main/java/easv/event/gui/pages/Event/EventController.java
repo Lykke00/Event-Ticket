@@ -106,6 +106,7 @@ public class EventController implements Initializable {
 
 
     private void goToEventItemPage(EventItemModel eventItemModel) {
+        eventInteractor.getCoordinatorsForEvent(eventItemModel);
         PageHandler.getInstance().setCurrentPage(Pages.EVENT_ITEM_PAGE);
         MainModel.getInstance().getEventItemModel().eventItemModelProperty().set(eventItemModel);
     }
@@ -195,7 +196,7 @@ public class EventController implements Initializable {
                                     "Bekræft slet Event",
                                     "Bekræft slet af " + item.nameProperty().get(),
                                     "Bemærk, hvis du sletter dette, er eventet \"" + item.nameProperty().get() + "\" væk for altid. \n\nEr du sikker på at du vil fortsætte?",
-                                    () -> model.deleteEvent(item));
+                                    () -> eventInteractor.deleteEvent(item));
                     });
 
                     HBox.setHgrow(hBox, Priority.ALWAYS);
