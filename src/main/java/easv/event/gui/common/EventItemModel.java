@@ -31,6 +31,14 @@ public class EventItemModel {
         this.date.set(date);
     }
 
+    public EventItemModel(String name, String description, String location, String time, LocalDate date) {
+        this.name.set(name);
+        this.description.set(description);
+        this.location.set(location);
+        this.time.set(time);
+        this.date.set(date);
+    }
+
     public EventItemModel(int id, String name, String description, String location, int soldTickets, String time, LocalDate date, ObservableList<UserModel> coordinators) {
         this.id.set(id);
         this.name.set(name);

@@ -62,4 +62,24 @@ public class EventInteractor {
     public void deleteEvent(EventItemModel eventItemModel) {
 
     }
+
+    public void createEvent(EventItemModel eventItemModel) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        Event event = EventItemModel.toEntity(eventItemModel);
+                        return eventManager.createEvent(event);
+                    } catch (Exception e) {
+                        throw new RuntimeException("En fejl skete ved at prøve og oprette et nyt Event", e);
+                    }
+                },
+                createdEvent -> {
+                    EventItemModel createdEventItemModel = EventItemModel.fromEntity(createdEvent);
+                    eventModel.eventsListProperty().add(createdEventItemModel);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke hente data for bruger", exception);
+                }
+        );
+    }
 }

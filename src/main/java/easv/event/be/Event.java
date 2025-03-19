@@ -1,5 +1,6 @@
 package easv.event.be;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +26,12 @@ public class Event {
         this.location = location;
     }
 
-    public Event(String location, String startsAt, LocalDate date, String description, String title) {
-        this.location = location;
-        this.startsAt = startsAt;
-        this.date = date;
-        this.description = description;
+    public Event(String title, String description, LocalDate date, String startsAt, String location) {
         this.title = title;
+        this.description = description;
+        this.date = date;
+        this.startsAt = startsAt;
+        this.location = location;
     }
 
     public int getId() {

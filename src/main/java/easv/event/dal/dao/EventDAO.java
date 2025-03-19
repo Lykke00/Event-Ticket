@@ -1,13 +1,10 @@
 package easv.event.dal.dao;
 
 import easv.event.be.Event;
-import easv.event.be.User;
 import easv.event.dal.DBConnector;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,4 +52,34 @@ public class EventDAO implements IEventDAO {
             throw new Exception("Kunne ikke hente alle Events for bruger. Bruger id: " + userId);
         }
     }
+    @Override
+    public Event createEvent(Event event) throws Exception {
+        String query = """
+                INSERT INTO events (title, description, date, starts_at, location) 
+                        VALUES (?, ?, ?, ?, ?)
+                """;
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, event.getTitle());
+            stmt.setString(2, event.getDescription());
+            stmt.setDate(3, Date.valueOf(event.getDate()));
+            stmt.setString(4, event.getStartsAt());
+            stmt.setString(5, event.getLocation());
+
+            int rowsAffected = stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    event.setId(rs.getInt(1));
+                }
+            }
+
+            return event;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke oprette event i database", e);
+        }
+    }
+
 }

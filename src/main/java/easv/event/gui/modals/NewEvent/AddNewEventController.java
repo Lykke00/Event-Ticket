@@ -3,6 +3,7 @@ package easv.event.gui.modals.NewEvent;
 import atlantafx.base.controls.MaskTextField;
 import atlantafx.base.theme.Styles;
 import easv.event.gui.MainModel;
+import easv.event.gui.common.EventItemModel;
 import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.pages.Event.EventModel;
 import easv.event.gui.utils.ModalHandler;
@@ -10,10 +11,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.DateCell;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material2.Material2OutlinedMZ;
 
@@ -28,8 +26,11 @@ import java.util.ResourceBundle;
 import static easv.event.gui.utils.DateFormatter.createLocalDateConverter;
 
 public class AddNewEventController implements Initializable {
-    private final EventInteractor eventInterator = MainModel.getInstance().getEventInteractor();
+    private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
     private final static ModalHandler modalHandler = ModalHandler.getInstance();
+
+    @FXML
+    private TextArea txtAreaDescription;
 
     @FXML
     private Button btnCreateEvent;
@@ -128,9 +129,8 @@ public class AddNewEventController implements Initializable {
     }
 
     @FXML
-    private void btnActionCreateEvent(ActionEvent actionEvent) {
-        //eventModel.addEvent(1, txtFieldName.getText(), txtFieldLocation.getText(), maskTxtFieldTime.getText(), datePickr.getValue().toString());
-
+    private void btnActionCreateEvent(ActionEvent actionEvent) throws Exception {
+        eventInteractor.createEvent(new EventItemModel(txtFieldName.getText(), txtAreaDescription.getText(), txtFieldLocation.getText(), maskTxtFieldTime.getText(), datePickr.getValue()));
         modalHandler.hideModal();
     }
 }
