@@ -88,7 +88,7 @@ public class EventItemModel {
     }
 
     public static Event toEntity(EventItemModel eventItemModel) {
-        return new Event(eventItemModel.nameProperty().get(), eventItemModel.descriptionProperty().get(), eventItemModel.dateProperty().get(), eventItemModel.timeProperty().get(), eventItemModel.locationProperty().get());
+        return new Event(eventItemModel.idProperty().get(), eventItemModel.nameProperty().get(), eventItemModel.descriptionProperty().get(), eventItemModel.dateProperty().get(), eventItemModel.timeProperty().get(), eventItemModel.locationProperty().get());
     }
 
     @Override
