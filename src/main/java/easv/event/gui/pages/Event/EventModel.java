@@ -30,3 +30,4 @@ public class EventModel {
     public boolean deleteEvent(EventItemModel item) {
         return this.events.remove(item);
     }
+}

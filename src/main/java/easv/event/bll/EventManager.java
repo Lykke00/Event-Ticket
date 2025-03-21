@@ -35,4 +35,26 @@ public class EventManager {
             boolean assign = assignCoordinator(event, user);
 
             if (assign) {
-                eve
+                event.addCoordinator(user);
+            }
+        }
+
+        return createdEvent;
+    }
+
+    public boolean deleteEvent(Event event) throws Exception {
+        return eventDAO.deleteEvent(event);
+    }
+
+    public List<User> getCoordinatorsForEvent(Event event) throws Exception {
+        return eventDAO.getCoordinatorsForEvent(event);
+    }
+
+    public boolean assignCoordinators(Event event, List<User> users) throws Exception {
+        return eventDAO.assignCoordinators(event, users);
+    }
+
+    public boolean assignCoordinator(Event event, User user) throws Exception {
+        return eventDAO.assignCoordinator(event, user);
+    }
+}

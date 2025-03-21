@@ -140,4 +140,49 @@ public class EventDAO implements IEventDAO {
         }
     }
 
- 
+    @Override
+    public boolean assignCoordinators(Event event, List<User> users) throws Exception {
+        String query =
+                "INSERT INTO events_coordinators (user_id, event_id) VALUES (?, ?)";
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            conn.setAutoCommit(false); // Deaktiver automatisk commit for batch
+
+            for (User user : users) {
+                stmt.setInt(1, user.getId());
+                stmt.setInt(2, event.getId());
+                stmt.addBatch();
+            }
+
+            // Udfør batchindsættelsen
+            int[] result = stmt.executeBatch();
+
+            // Commit transaktionen
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            throw new Exception("Kunne ikke tilføje koordinator til event", e);
+        }
+    }
+
+    @Override
+    public boolean assignCoordinator(Event event, User user) throws Exception {
+        String query =
+                "INSERT INTO events_coordinators (user_id, event_id) VALUES (?, ?)";
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, user.getId());
+            stmt.setInt(2, event.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+
+            return true;
+        } catch (SQLException e) {
+            throw new Exception("Kunne ikke tilføje koordinator til event", e);
+        }
+    }
+}

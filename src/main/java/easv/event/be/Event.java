@@ -103,4 +103,10 @@ public class Event {
         return "Events{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", description='" + description + '
+                ", description='" + description + '\'' +
+                ", date='" + date + '\'' +
+                ", startsAt='" + startsAt + '\'' +
+                ", location='" + location + '\'' +
+                '}';
+    }
+}
