@@ -28,14 +28,11 @@ public class EventManager {
     }
 
     public Event createEvent(Event event) throws Exception {
-        return eventDAO.createEvent(event);
-    }
+        Event createdEvent = eventDAO.createEvent(event);
 
-    public boolean deleteEvent(Event event) throws Exception {
-        return eventDAO.deleteEvent(event);
-    }
+        if (createdEvent != null) {
+            User user = new User(1, "Lykke", "Bernberg", "lykber01@easv.dk", "Koordinator", "Bramming");
+            boolean assign = assignCoordinator(event, user);
 
-    public List<User> getCoordinatorsForEvent(Event event) throws Exception {
-        return eventDAO.getCoordinatorsForEvent(event);
-    }
-}
+            if (assign) {
+                eve

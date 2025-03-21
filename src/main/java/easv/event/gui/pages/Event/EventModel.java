@@ -16,7 +16,7 @@ public class EventModel {
     }
 
     public SortedList<EventItemModel> getSortedEventsList() {
-        return new SortedList<>(events, (event1, event2) -> event2.dateProperty().get().compareTo(event1.dateProperty().get()));
+        return new SortedList<>(events, (event1, event2) -> Integer.compare(event2.idProperty().get(), event1.idProperty().get()));
     }
 
     public FilteredList<EventItemModel> getCompletedEventsList() {
@@ -30,4 +30,3 @@ public class EventModel {
     public boolean deleteEvent(EventItemModel item) {
         return this.events.remove(item);
     }
-}

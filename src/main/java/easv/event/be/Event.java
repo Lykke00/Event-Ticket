@@ -90,15 +90,17 @@ public class Event {
         this.soldTickets = soldTickets;
     }
 
+    public List<User> getCoordinators() {
+        return coordinators;
+    }
+
+    public void addCoordinator(User coordinator) {
+        this.coordinators.add(coordinator);
+    }
+
     @Override
     public String toString() {
         return "Events{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", date='" + date + '\'' +
-                ", startsAt='" + startsAt + '\'' +
-                ", location='" + location + '\'' +
-                '}';
-    }
-}
+                ", description='" + description + '

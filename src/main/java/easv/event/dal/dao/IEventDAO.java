@@ -10,4 +10,4 @@ public interface IEventDAO {
     Event createEvent(Event event) throws Exception;
     boolean deleteEvent(Event event) throws Exception;
     List<User> getCoordinatorsForEvent(Event event) throws Exception;
-}
+  

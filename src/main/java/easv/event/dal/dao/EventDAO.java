@@ -139,4 +139,5 @@ public class EventDAO implements IEventDAO {
             throw new Exception("Kunne ikke hente koordinator for event");
         }
     }
-}
+
+ 

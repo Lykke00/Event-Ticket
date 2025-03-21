@@ -9,9 +9,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="mainWindow" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.event.gui.MainController">
+<BorderPane fx:id="mainWindow" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.event.gui.MainController">
    <top>
-      <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="731.0" spacing="5.0" styleClass="header-tab-pane">
+      <HBox alignment="CENTER_LEFT" prefHeight="51.0" prefWidth="731.0" spacing="5.0" styleClass="header-tab-pane">
          <children>
             <HBox alignment="CENTER_LEFT" minWidth="-Infinity" prefHeight="52.0" prefWidth="147.0" spacing="10.0">
                <children>

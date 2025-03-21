@@ -6,6 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Random;
 
 public class EventItemModel {
@@ -84,17 +85,13 @@ public class EventItemModel {
     }
 
     public static EventItemModel fromEntity(Event event) {
-        return new EventItemModel(event.getId(), event.getTitle(), event.getDescription(), event.getLocation(), event.getSoldTickets(), event.getStartsAt(), event.getDate());
+        List<UserModel> coordinatorModels = event.getCoordinators().stream()
+                .map(UserModel::fromEntity)
+                .toList();
+
+        return new EventItemModel(event.getId(), event.getTitle(), event.getDescription(), event.getLocation(), event.getSoldTickets(), event.getStartsAt(), event.getDate(), FXCollections.observableArrayList(coordinatorModels));
     }
+
 
     public static Event toEntity(EventItemModel eventItemModel) {
-        return new Event(eventItemModel.idProperty().get(), eventItemModel.nameProperty().get(), eventItemModel.descriptionProperty().get(), eventItemModel.dateProperty().get(), eventItemModel.timeProperty().get(), eventItemModel.locationProperty().get());
-    }
-
-    @Override
-    public String toString() {
-        return name.get();
-    }
-
-
-}
+        return new Event(eventItemModel.idProperty().get(), eventItemModel.nameProperty().get(), eventItemModel.description
