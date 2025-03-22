@@ -13,11 +13,16 @@ import java.util.List;
 
 public class EventInteractor {
     private final EventModel eventModel;
-    private final EventManager eventManager;
+    private EventManager eventManager;
 
-    public EventInteractor() throws Exception {
+    public EventInteractor() {
         this.eventModel = new EventModel();
-        this.eventManager = new EventManager();
+
+        try {
+            this.eventManager = new EventManager();
+        } catch (Exception e) {
+            DialogHandler.showExceptionError("Database fejl", "EventManager kunne ikke oprette forbindelse til databasen", e);
+        }
 
         initialize();
     }

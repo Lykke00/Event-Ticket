@@ -1,12 +1,10 @@
 package easv.event.gui;
 
+import easv.event.enums.UserRole;
 import easv.event.gui.common.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 
 public class TestData {

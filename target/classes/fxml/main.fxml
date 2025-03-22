@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="mainWindow" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.event.gui.MainController">
+<BorderPane fx:id="mainWindow" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.event.gui.MainController">
    <top>
       <HBox alignment="CENTER_LEFT" prefHeight="51.0" prefWidth="731.0" spacing="5.0" styleClass="header-tab-pane">
          <children>
@@ -28,7 +28,7 @@
                   </VBox>
                </children>
             </HBox>
-            <HBox alignment="CENTER_RIGHT" prefHeight="52.0" prefWidth="195.0" spacing="30.0" HBox.hgrow="ALWAYS">
+            <HBox fx:id="hBoxTabs" alignment="CENTER_RIGHT" prefHeight="52.0" prefWidth="195.0" spacing="30.0" HBox.hgrow="ALWAYS">
                <children>
                   <Button fx:id="btnEventsPage" maxHeight="1.7976931348623157E308" mnemonicParsing="false" styleClass="tab" text="Events" />
                   <Button fx:id="btnTicketPage" maxHeight="1.7976931348623157E308" mnemonicParsing="false" styleClass="tab" text="Billetter" HBox.hgrow="ALWAYS" />

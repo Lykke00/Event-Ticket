@@ -1,6 +1,7 @@
 package easv.event.gui.common;
 
 import easv.event.be.User;
+import easv.event.enums.UserRole;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -47,7 +48,7 @@ public class UserModel {
     }
 
     public static UserModel fromEntity(User user) {
-        return new UserModel(user.getId(), user.getFirstName(), user.getLastName(), user.getLocation(), user.getEmail(), UserRole.fromRole(user.getRole()));
+        return new UserModel(user.getId(), user.getFirstName(), user.getLastName(), user.getLocation(), user.getEmail(), user.getRole());
     }
 
     @Override

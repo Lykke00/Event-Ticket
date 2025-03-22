@@ -1,6 +1,7 @@
 package easv.event.gui;
 
 import easv.event.gui.common.EventItemModel;
+import easv.event.gui.interactors.AuthInteractor;
 import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.modals.EditEvent.EditEventModel;
 import easv.event.gui.modals.EditTicket.EditTicketModel;
@@ -18,6 +19,8 @@ public class MainModel {
     private final static MainModel instance = new MainModel();
 
     private EventInteractor eventInteractor;
+    private AuthInteractor authInteractor;
+
     private final EventItemPageModel eventItemModel;
 
     private final EditEventModel editEventModel;
@@ -35,11 +38,10 @@ public class MainModel {
     private final EventAssignModel eventAssignModel;
 
     private MainModel() {
-        try {
-            eventInteractor = new EventInteractor();
-        } catch (Exception e) {
-            DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke oprette forbindelse til databasen", e);
-        }
+        usersModel = new UsersModel();
+
+        eventInteractor = new EventInteractor();
+        authInteractor = new AuthInteractor(usersModel);
 
         editEventModel = new EditEventModel();
         eventItemModel = new EventItemPageModel();
@@ -50,7 +52,6 @@ public class MainModel {
         editTicketModel = new EditTicketModel();
         ticketEditEventModel = new TicketEditEventModel();
 
-        usersModel = new UsersModel();
         userEditModel = new UserEditModel();
 
         eventAssignModel = new EventAssignModel();
@@ -66,6 +67,10 @@ public class MainModel {
 
     public EventInteractor getEventInteractor() {
         return eventInteractor;
+    }
+
+    public AuthInteractor getAuthInteractor() {
+        return authInteractor;
     }
 
     public EventItemPageModel getEventItemModel() {
@@ -103,4 +108,6 @@ public class MainModel {
     public EventAssignModel getEventAssignModel() {
         return eventAssignModel;
     }
+
+
 }

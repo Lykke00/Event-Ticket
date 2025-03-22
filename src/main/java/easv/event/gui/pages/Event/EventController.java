@@ -4,8 +4,11 @@ import atlantafx.base.controls.Card;
 import atlantafx.base.controls.CustomTextField;
 import atlantafx.base.controls.Tile;
 import atlantafx.base.theme.Styles;
+import easv.event.enums.UserRole;
 import easv.event.gui.MainModel;
+import easv.event.gui.common.AuthModel;
 import easv.event.gui.common.EventItemModel;
+import easv.event.gui.interactors.AuthInteractor;
 import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.modals.Modal;
 import easv.event.gui.pages.Pages;
@@ -32,6 +35,8 @@ import java.util.ResourceBundle;
 
 public class EventController implements Initializable {
     private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
+    private final AuthModel authModel = MainModel.getInstance().getAuthInteractor().getAuthModel();
+
     private final EventModel model = eventInteractor.getEventModel();
 
     private SortedList<EventItemModel> sortedEventsList;
@@ -75,11 +80,26 @@ public class EventController implements Initializable {
         Tooltip createEventToolTip = new Tooltip("Opret nyt event");
         btnAddNewEvent.setTooltip(createEventToolTip);
 
+        //TODO: User permission, tilføj tilbage når alt er lavet
+        //userPermissionView();
+
         setCardDetails();
         updateTableView();
         createTableRowClick();
         initializeFilteredList();
         setupTextFieldSearch();
+    }
+
+    private void userPermissionView() {
+        btnAddNewEvent.visibleProperty().bind(
+                authModel.userProperty().get().roleProperty().isEqualTo(UserRole.COORDINATOR)
+        );
+    }
+
+    private void userPermissionViewControls(HBox hBox, Button btnEdit) {
+        boolean isAdmin = authModel.userProperty().get().roleProperty().get().equals(UserRole.ADMIN);
+        if (isAdmin)
+            hBox.getChildren().remove(btnEdit);
     }
 
     private void setupTextFieldSearch() {
@@ -152,7 +172,6 @@ public class EventController implements Initializable {
                 private final Button btnDelete = new Button(null, new FontIcon(Feather.TRASH));
 
                 private final HBox hBox = new HBox(10, btnView, btnAssign, btnEdit, btnDelete);
-
                 {
                     Tooltip showToolTip = new Tooltip("Vis");
                     Tooltip assignToolTip = new Tooltip("Tildel");
@@ -201,6 +220,9 @@ public class EventController implements Initializable {
 
                     HBox.setHgrow(hBox, Priority.ALWAYS);
                     hBox.setAlignment(Pos.CENTER_RIGHT);
+
+                    //TODO: User permission, tilføj tilbage når alt er lavet
+                    //userPermissionViewControls(hBox, btnEdit);
                 }
 
                 @Override

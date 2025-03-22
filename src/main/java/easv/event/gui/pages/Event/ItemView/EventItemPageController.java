@@ -3,7 +3,9 @@ package easv.event.gui.pages.Event.ItemView;
 import atlantafx.base.controls.Card;
 import atlantafx.base.controls.Spacer;
 import atlantafx.base.theme.Styles;
+import easv.event.enums.UserRole;
 import easv.event.gui.MainModel;
+import easv.event.gui.common.AuthModel;
 import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.UserModel;
 import easv.event.gui.interactors.EventInteractor;
@@ -34,6 +36,8 @@ import java.util.ResourceBundle;
 
 public class EventItemPageController implements Initializable {
     private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
+    private final AuthModel authModel = MainModel.getInstance().getAuthInteractor().getAuthModel();
+
     private final EventItemPageModel eventItemPageModel;
 
     @FXML
@@ -71,6 +75,14 @@ public class EventItemPageController implements Initializable {
             }
         });
     }
+
+    private void userPermissionView(HBox controlsBox, Button btnEdit) {
+        // hvis admin så fjern btnEdit
+        boolean isAdmin = authModel.userProperty().get().roleProperty().get().equals(UserRole.ADMIN);
+        if (isAdmin)
+            controlsBox.getChildren().remove(btnEdit);
+    }
+
 
     private void updateUI(EventItemModel eventItemModel) {
         VBox cardContent = new VBox(5);
@@ -119,6 +131,7 @@ public class EventItemPageController implements Initializable {
         btnDelete.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.DANGER, Styles.FLAT);
 
         HBox controlsBox = new HBox(btnEdit, btnDelete);
+
         controlsBox.setAlignment(Pos.CENTER_RIGHT);
         controlsBox.translateYProperty().setValue(-5);
 
@@ -139,6 +152,8 @@ public class EventItemPageController implements Initializable {
                 addCoordinators(eventItemModel);
         });
 
+        //TODO: User permission, tilføj tilbage når alt er lavet
+        //userPermissionView(controlsBox, btnEdit);
         addCoordinators(eventItemModel);
     }
 

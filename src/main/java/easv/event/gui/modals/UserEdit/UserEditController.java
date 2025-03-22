@@ -1,10 +1,8 @@
 package easv.event.gui.modals.UserEdit;
 
 import easv.event.gui.MainModel;
-import easv.event.gui.common.TicketItemModel;
 import easv.event.gui.common.UserModel;
-import easv.event.gui.common.UserRole;
-import easv.event.gui.modals.EditTicket.EditTicketModel;
+import easv.event.enums.UserRole;
 import easv.event.gui.utils.ModalHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;

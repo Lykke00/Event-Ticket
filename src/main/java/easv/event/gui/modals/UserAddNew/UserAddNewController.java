@@ -1,7 +1,9 @@
 package easv.event.gui.modals.UserAddNew;
 
+import easv.event.be.User;
 import easv.event.gui.MainModel;
-import easv.event.gui.common.UserRole;
+import easv.event.enums.UserRole;
+import easv.event.gui.interactors.AuthInteractor;
 import easv.event.gui.utils.ModalHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -16,9 +18,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class UserAddNewController implements Initializable {
+    private final AuthInteractor authInteractor = MainModel.getInstance().getAuthInteractor();
 
     @FXML
-    private TextField txtFieldName, txtFieldSurname, txtFieldLocation, txtFieldEmail;
+    private TextField txtFieldName, txtFieldSurname, txtFieldLocation, txtFieldEmail, txtFieldPassword;
 
     @FXML
     private ChoiceBox<UserRole> comboBoxType;
@@ -37,6 +40,7 @@ public class UserAddNewController implements Initializable {
                 .or(txtFieldSurname.textProperty().isEmpty())
                 .or(txtFieldLocation.textProperty().isEmpty())
                 .or(txtFieldEmail.textProperty().isEmpty())
+                .or(txtFieldPassword.textProperty().isEmpty())
                 .or(comboBoxType.valueProperty().isNull())
                 .or(Bindings.createBooleanBinding(() -> !isValidEmail(txtFieldEmail.getText()), txtFieldEmail.textProperty()));
 
@@ -61,14 +65,10 @@ public class UserAddNewController implements Initializable {
 
     @FXML
     private void btnActionAddUser(ActionEvent actionEvent) {
-        MainModel.getInstance().getUsersModel().createUser(
-                txtFieldName.getText(),
-                txtFieldSurname.getText(),
-                txtFieldLocation.getText(),
-                txtFieldEmail.getText(),
-                comboBoxType.getValue()
-        );
+        User user = new User(txtFieldName.getText(), txtFieldSurname.getText(), txtFieldEmail.getText(), txtFieldLocation.getText(), comboBoxType.getValue().getRole(), txtFieldPassword.getText());
 
+        authInteractor.registerUser(user);
+        //TODO: tjek om db fejl før vi skjuler modal igen
         ModalHandler.getInstance().hideModal();
     }
 }
