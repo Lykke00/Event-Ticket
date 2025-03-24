@@ -10,4 +10,6 @@ public interface IUserDAO {
     User createUser(User user) throws Exception;
 
     List<User> getAllCoordinators() throws Exception;
+    List<User> getAll() throws Exception;
+
 }

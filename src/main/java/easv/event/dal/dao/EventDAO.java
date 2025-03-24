@@ -185,4 +185,31 @@ public class EventDAO implements IEventDAO {
             throw new Exception("Kunne ikke tilføje koordinator til event", e);
         }
     }
+
+    @Override
+    public boolean removedAssignedCoordinators(Event event, List<User> users) throws Exception {
+        String query =
+                "DELETE FROM events_coordinators WHERE user_id = ? AND event_id = ?";
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            conn.setAutoCommit(false); // Deaktiver automatisk commit for batch
+
+            for (User user : users) {
+                stmt.setInt(1, user.getId());
+                stmt.setInt(2, event.getId());
+                stmt.addBatch();
+            }
+
+            // Udfør batchindsættelsen
+            int[] result = stmt.executeBatch();
+
+            // Commit transaktionen
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            throw new Exception("Kunne ikke fjerne koordinatore fra event", e);
+        }
+    }
 }

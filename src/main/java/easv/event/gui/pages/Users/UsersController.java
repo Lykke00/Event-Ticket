@@ -5,6 +5,7 @@ import atlantafx.base.theme.Styles;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.UserModel;
 import easv.event.enums.UserRole;
+import easv.event.gui.interactors.UserInteractor;
 import easv.event.gui.modals.Modal;
 import easv.event.gui.utils.ButtonStyle;
 import easv.event.gui.utils.DialogHandler;
@@ -24,7 +25,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class UsersController implements Initializable {
-    private final UsersModel model = MainModel.getInstance().getUsersModel();
+    private final UserInteractor userInteractor = MainModel.getInstance().getUserInteractor();
+    private final UsersModel model = userInteractor.getUsersModel();
     private SortedList<UserModel> sortedUserList;
     private FilteredList<UserModel> filteredUserList;
 

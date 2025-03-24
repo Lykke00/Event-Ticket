@@ -115,12 +115,66 @@ public class UserDAO implements IUserDAO {
         List<User> coordinators = new ArrayList<>();
 
         String query = """
-                    SELECT * FROM users
+                    SELECT users.id, users.first_name, users.last_name, users.email, users.password, users.location, users_roles.name as role_name
+                    FROM users
                     JOIN users_roles ON users.role = users_roles.id
-                    WHERE users_roles.name = "Koordinator"
+                    WHERE users_roles.name = 'Koordinator'
                 """;
 
-        return List.of();
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            ResultSet resultSet = stmt.executeQuery();
+
+            while (resultSet.next()) {
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
+                String userEmail = resultSet.getString("email");
+                String passwordHash = resultSet.getString("password");
+                String location = resultSet.getString("location");
+                String role = resultSet.getString("role_name");
+
+                User user = new User(firstName, lastName, userEmail, location, role, passwordHash);
+                coordinators.add(user);
+            }
+
+            return coordinators;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke få fat i alle koordinatorer i databasen", e);
+        }
+    }
+
+    @Override
+    public List<User> getAll() throws Exception {
+        List<User> users = new ArrayList<>();
+
+        String query = """
+                    SELECT users.id, users.first_name, users.last_name, users.email, users.password, users.location, users_roles.name as role_name
+                    FROM users
+                    JOIN users_roles ON users.role = users_roles.id
+                """;
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            ResultSet resultSet = stmt.executeQuery();
+
+            while (resultSet.next()) {
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
+                String userEmail = resultSet.getString("email");
+                String passwordHash = resultSet.getString("password");
+                String location = resultSet.getString("location");
+                String role = resultSet.getString("role_name");
+
+                User user = new User(firstName, lastName, userEmail, location, role, passwordHash);
+                users.add(user);
+            }
+
+            return users;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke få fat i alle brugere i databasen", e);
+        }
     }
 
     private int getRoleIdByName(Connection conn, String roleName) throws SQLException {

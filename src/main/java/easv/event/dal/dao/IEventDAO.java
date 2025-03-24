@@ -12,4 +12,5 @@ public interface IEventDAO {
     List<User> getCoordinatorsForEvent(Event event) throws Exception;
     boolean assignCoordinators(Event event, List<User> users) throws Exception;
     boolean assignCoordinator(Event event, User user) throws Exception;
+    boolean removedAssignedCoordinators(Event event, List<User> users) throws Exception;
 }

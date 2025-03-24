@@ -51,10 +51,10 @@ public class EventManager {
     }
 
     public boolean assignCoordinators(Event event, List<User> users) throws Exception {
-        return eventDAO.assignCoordinators(event, users);
+        return true;
     }
 
     public boolean assignCoordinator(Event event, User user) throws Exception {
-        return eventDAO.assignCoordinator(event, user);
+        return true;
     }
 }

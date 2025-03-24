@@ -52,16 +52,4 @@ public class TestData {
 
         return tickets;
     }
-
-    public static ObservableList<UserModel> userTestData() {
-        if (users.isEmpty()) {
-            users.add(new UserModel(1, "Jakob", "Hansen", "Aarhus", "test@test.com", UserRole.COORDINATOR));
-            users.add(new UserModel(2, "Thomas", "Mikkelsen", "Aarhus","test2@test.com", UserRole.COORDINATOR));
-            users.add(new UserModel(3, "Lykke", "Bernberg", "Esbjerg","test3@test.com", UserRole.ADMIN));
-            users.add(new UserModel(4, "Thor", "Farlov", "Esbjerg","test4@test.com", UserRole.COORDINATOR));
-            users.add(new UserModel(5, "Kasper", "Jakobsen", "Sønderborg","test5@test.com", UserRole.COORDINATOR));
-        }
-
-        return users;
-    }
 }

@@ -43,6 +43,9 @@ public class UserManager {
         return userDAO.getAllCoordinators();
     }
 
+    public List<User> getAll() throws Exception {
+        return userDAO.getAll();
+    }
 
     public static void main(String[] args) {
         UserManager userManager = null;

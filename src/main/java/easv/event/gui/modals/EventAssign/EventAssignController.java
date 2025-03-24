@@ -3,6 +3,7 @@ package easv.event.gui.modals.EventAssign;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.UserModel;
+import easv.event.gui.interactors.UserInteractor;
 import easv.event.gui.utils.ModalHandler;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,6 +19,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class EventAssignController implements Initializable {
+    private final UserInteractor userInteractor = MainModel.getInstance().getUserInteractor();
     private EventAssignModel eventAssignModel;
 
     @FXML
@@ -46,7 +48,7 @@ public class EventAssignController implements Initializable {
     }
 
     private void updateEventComboBox(EventItemModel eventItemModel) {
-        ObservableList<UserModel> allCoordinators = MainModel.getInstance().getUsersModel().usersModelObservableList();
+        ObservableList<UserModel> allCoordinators = userInteractor.getUsersModel().coordinatorListModelObservableList();
         ObservableList<UserModel> eventCoordinators = eventItemModel != null ? eventItemModel.coordinatorsProperty() : FXCollections.observableArrayList();
 
         comboBoxUsers.getCheckModel().clearChecks();

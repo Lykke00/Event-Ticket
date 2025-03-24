@@ -7,9 +7,14 @@ import javafx.collections.transformation.SortedList;
 
 public class UsersModel {
     private final ObservableList<UserModel> usersList = FXCollections.observableArrayList();
+    private final ObservableList<UserModel> coordinatorList = FXCollections.observableArrayList();
 
     public ObservableList<UserModel> usersModelObservableList() {
         return usersList;
+    }
+
+    public ObservableList<UserModel> coordinatorListModelObservableList() {
+        return coordinatorList;
     }
 
     public void deleteUser(UserModel item) {
