@@ -20,12 +20,32 @@ public class User {
         this.location = location;
     }
 
+    public User(int id, String firstName, String lastName, String email, UserRole role, String location) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.role = role;
+        this.location = location;
+    }
+
     public User(String firstName, String lastName, String email, String role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.role = UserRole.fromRole(role);
     }
+
+    public User(int id, String firstName, String lastName, String email, String location, String role, String passwordHash) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.location = location;
+        this.email = email;
+        this.role = UserRole.fromRole(role);
+        this.passwordHash = passwordHash;
+    }
+
 
     public User(String firstName, String lastName, String email, String location, String role, String passwordHash) {
         this.firstName = firstName;

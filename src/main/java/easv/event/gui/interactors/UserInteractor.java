@@ -7,6 +7,8 @@ import easv.event.gui.common.UserModel;
 import easv.event.gui.pages.Users.UsersModel;
 import easv.event.gui.utils.BackgroundTaskExecutor;
 import easv.event.gui.utils.DialogHandler;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.List;
 public class UserInteractor {
     private UserManager userManager;
     private final UsersModel usersModel;
+
+    private BooleanProperty loadingCoordinatorsFromDbProperty = new SimpleBooleanProperty(false);
 
     public UserInteractor(UsersModel usersModel) {
         this.usersModel = usersModel;
@@ -23,12 +27,13 @@ public class UserInteractor {
         } catch (IOException e) {
             DialogHandler.showExceptionError("Database fejl", "UserManager kunne ikke oprette forbindelse til databasen", e);
         }
-
-        initialize();
     }
 
-    private void initialize() {
+    public void initialize() {
         getAllUsers();
+    }
+
+    public void initializeAllCoordinators() {
         getAllCoordinators();
     }
 
@@ -46,7 +51,7 @@ public class UserInteractor {
                             .map(UserModel::fromEntity)
                             .toList();
 
-                    usersModel.usersModelObservableList().addAll(userModels);
+                    usersModel.usersModelObservableList().setAll(userModels);
                 },
                 exception -> {
                     DialogHandler.showExceptionError("Database fejl", "Kunne ikke få fat i alle brugere", exception);
@@ -58,6 +63,7 @@ public class UserInteractor {
         BackgroundTaskExecutor.execute(
                 () -> {
                     try {
+                        loadingCoordinatorsFromDbProperty.set(true);
                         return userManager.getAllCoordinators();
                     } catch (Exception e) {
                         throw new RuntimeException("Database fejl ved forsøg på at få fat i alle koordinatore", e);
@@ -68,12 +74,18 @@ public class UserInteractor {
                             .map(UserModel::fromEntity)
                             .toList();
 
-                    usersModel.coordinatorListModelObservableList().addAll(userModels);
+                    usersModel.coordinatorListModelObservableList().setAll(userModels);
+                    loadingCoordinatorsFromDbProperty.set(false);
                 },
                 exception -> {
+                    loadingCoordinatorsFromDbProperty.set(false);
                     DialogHandler.showExceptionError("Database fejl", "Kunne ikke få fat i alle koordinatore", exception);
                 }
         );
+    }
+
+    public BooleanProperty loadingCoordinatorsFromDbProperty() {
+        return loadingCoordinatorsFromDbProperty;
     }
 
     public UsersModel getUsersModel() {

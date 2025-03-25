@@ -7,6 +7,7 @@ import easv.event.gui.common.UserModel;
 import easv.event.enums.UserRole;
 import easv.event.gui.interactors.UserInteractor;
 import easv.event.gui.modals.Modal;
+import easv.event.gui.pages.IPageController;
 import easv.event.gui.utils.ButtonStyle;
 import easv.event.gui.utils.DialogHandler;
 import easv.event.gui.utils.ModalHandler;
@@ -24,7 +25,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class UsersController implements Initializable {
+public class UsersController implements Initializable, IPageController {
     private final UserInteractor userInteractor = MainModel.getInstance().getUserInteractor();
     private final UsersModel model = userInteractor.getUsersModel();
     private SortedList<UserModel> sortedUserList;
@@ -64,6 +65,11 @@ public class UsersController implements Initializable {
         initializeFilteredList();
         setupTextFieldSearch();
         setTableData();
+    }
+
+    @Override
+    public void load() {
+        userInteractor.initialize();
     }
 
     private void setupTextFieldSearch() {

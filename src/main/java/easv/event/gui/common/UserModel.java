@@ -51,6 +51,10 @@ public class UserModel {
         return new UserModel(user.getId(), user.getFirstName(), user.getLastName(), user.getLocation(), user.getEmail(), user.getRole());
     }
 
+    public static User toEntity(UserModel userModel) {
+        return new User(userModel.id.get(), userModel.firstName.get(), userModel.lastName.get(), userModel.email.get(), userModel.role.get(), userModel.location.get());
+    }
+
     @Override
     public String toString() {
         return firstName.get() + " " + lastName.get() + " (" + location.get() + ")";

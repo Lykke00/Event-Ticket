@@ -27,6 +27,10 @@ public class EventManager {
         return eventDAO.getEventsForUser(userId);
     }
 
+    public List<Event> getAllEvents() throws Exception {
+        return eventDAO.getAllEvents();
+    }
+
     public Event createEvent(Event event) throws Exception {
         Event createdEvent = eventDAO.createEvent(event);
 
@@ -51,10 +55,14 @@ public class EventManager {
     }
 
     public boolean assignCoordinators(Event event, List<User> users) throws Exception {
-        return true;
+        return eventDAO.assignCoordinators(event, users);
     }
 
     public boolean assignCoordinator(Event event, User user) throws Exception {
-        return true;
+        return eventDAO.assignCoordinator(event, user);
+    }
+
+    public boolean changeCoordinators(Event event, List<User> added, List<User> removed) throws Exception {
+        return eventDAO.changeCoordinators(event, added, removed);
     }
 }

@@ -3,8 +3,13 @@ package easv.event.gui.modals.EventAssign;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.UserModel;
+import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.interactors.UserInteractor;
+import easv.event.gui.modals.IModalController;
 import easv.event.gui.utils.ModalHandler;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -16,9 +21,12 @@ import javafx.scene.layout.VBox;
 import org.controlsfx.control.CheckComboBox;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
-public class EventAssignController implements Initializable {
+public class EventAssignController implements Initializable, IModalController {
+    private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
     private final UserInteractor userInteractor = MainModel.getInstance().getUserInteractor();
     private EventAssignModel eventAssignModel;
 
@@ -38,13 +46,29 @@ public class EventAssignController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         eventAssignModel = MainModel.getInstance().getEventAssignModel();
 
-        eventAssignModel.eventModelProperty().addListener((observable, oldItem, newItem) -> {
-            updateEventComboBox(newItem);
+        vBoxEvent.getChildren().add(comboBoxUsers);
+
+        comboBoxUsers.disableProperty().bind(eventAssignModel.loadingFromDatabaseProperty().and(userInteractor.loadingCoordinatorsFromDbProperty()));
+    }
+
+    @Override
+    public void load() {
+        eventAssignModel = MainModel.getInstance().getEventAssignModel();
+
+        userInteractor.initializeAllCoordinators();
+        eventInteractor.getCoordinatorsForAssign(eventAssignModel);
+
+        BooleanProperty loadingFromDatabase = eventAssignModel.loadingFromDatabaseProperty();
+        BooleanProperty loadingCoordinatorsFromDb = userInteractor.loadingCoordinatorsFromDbProperty();
+
+        BooleanBinding bothLoaded = loadingFromDatabase.not().and(loadingCoordinatorsFromDb.not());
+
+        bothLoaded.addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                updateEventComboBox(eventAssignModel.eventItemModel());
+            }
         });
 
-        updateEventComboBox(eventAssignModel.eventModelProperty().get());
-
-        vBoxEvent.getChildren().add(comboBoxUsers);
     }
 
     private void updateEventComboBox(EventItemModel eventItemModel) {
@@ -75,17 +99,26 @@ public class EventAssignController implements Initializable {
     @FXML
     private void btnActionAssign(ActionEvent actionEvent) {
         ObservableList<UserModel> selectedUsers = comboBoxUsers.getCheckModel().getCheckedItems();
+        ObservableList<UserModel> currentCoordinators = eventAssignModel.eventItemModel().coordinatorsProperty();
 
-        ObservableList<UserModel> currentCoordinators = eventAssignModel.eventModelProperty().get().coordinatorsProperty();
+        EventItemModel currentEvent = eventAssignModel.eventItemModel();
+        List<UserModel> removedUsers = getRemovedUsers(currentCoordinators, selectedUsers);
+        List<UserModel> addedUsers = selectedUsers.stream().toList();
 
-        currentCoordinators.clear();
+        eventInteractor.changeCoordinatorsForEvent(currentEvent, addedUsers, removedUsers);
 
-        currentCoordinators.addAll(selectedUsers);
-
-        selectedUsers.removeIf(userModel ->
-                currentCoordinators.stream().noneMatch(user -> user.idProperty().get() == userModel.idProperty().get())
-        );
         ModalHandler.getInstance().hideModal();
     }
 
+    public List<UserModel> getRemovedUsers(ObservableList<UserModel> currentCoordinators, ObservableList<UserModel> selectedUsers) {
+        List<UserModel> removedUsers = new ArrayList<>();
+
+        for (UserModel coordinator : currentCoordinators) {
+            if (!selectedUsers.contains(coordinator)) {
+                removedUsers.add(coordinator);
+            }
+        }
+
+        return removedUsers;
+    }
 }

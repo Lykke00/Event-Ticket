@@ -30,6 +30,7 @@ public class UserDAO implements IUserDAO {
 
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
+                    int id = rs.getInt("id");
                     String firstName = rs.getString("first_name");
                     String lastName = rs.getString("last_name");
                     String userEmail = rs.getString("email");
@@ -37,7 +38,7 @@ public class UserDAO implements IUserDAO {
                     String location = rs.getString("location");
                     String role = rs.getString("role_name");
 
-                    return new User(firstName, lastName, userEmail, location, role, passwordHash);
+                    return new User(id, firstName, lastName, userEmail, location, role, passwordHash);
                 }
 
                 return null;
@@ -127,6 +128,7 @@ public class UserDAO implements IUserDAO {
             ResultSet resultSet = stmt.executeQuery();
 
             while (resultSet.next()) {
+                int id = resultSet.getInt("id");
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
                 String userEmail = resultSet.getString("email");
@@ -134,7 +136,7 @@ public class UserDAO implements IUserDAO {
                 String location = resultSet.getString("location");
                 String role = resultSet.getString("role_name");
 
-                User user = new User(firstName, lastName, userEmail, location, role, passwordHash);
+                User user = new User(id, firstName, lastName, userEmail, location, role, passwordHash);
                 coordinators.add(user);
             }
 

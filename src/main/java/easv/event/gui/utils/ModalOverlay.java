@@ -3,7 +3,9 @@ package easv.event.gui.utils;
 import atlantafx.base.controls.ModalPane;
 import atlantafx.base.layout.ModalBox;
 import atlantafx.base.theme.Styles;
+import easv.event.gui.modals.IModalController;
 import easv.event.gui.modals.Modal;
+import easv.event.gui.pages.IPageController;
 import javafx.animation.Animation;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -75,6 +77,10 @@ public class ModalOverlay extends ModalPane {
             } catch (Exception e) {
                 throw new RuntimeException("Failed to load Modal: " + modal.getPath(), e);
             }
+        }
+
+        if (modal.getController() instanceof IModalController) {
+            ((IModalController) modal.getController()).load();
         }
 
         ModalBox modalBox = new ModalBox();

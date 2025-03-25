@@ -1,5 +1,6 @@
 package easv.event.gui.utils;
 
+import easv.event.gui.pages.IPageController;
 import easv.event.gui.pages.Pages;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -50,6 +51,10 @@ public class PageHandler {
             }
         } else {
             pageNode = pageCache.get(page);
+        }
+
+        if (page.getController() instanceof IPageController) {
+            ((IPageController) page.getController()).load();
         }
 
         currentPage = page;

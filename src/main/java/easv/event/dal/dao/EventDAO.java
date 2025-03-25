@@ -56,6 +56,40 @@ public class EventDAO implements IEventDAO {
     }
 
     @Override
+    public List<Event> getAllEvents() throws Exception {
+        List<Event> events = new ArrayList<>();
+
+        // vælg alt fra events
+        // tilføj tabellen events_coordinators hvor selve events tabellens id er det samme som events_coordinators.event_id
+        // hvor event_coordinators.user_id = et eller andet
+        String query = """
+                SELECT * FROM events
+                """;
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String title = rs.getString("title");
+                String description = rs.getString("description");
+                LocalDate date = rs.getDate("date").toLocalDate();
+                String startsAt = rs.getString("starts_at");
+                String location = rs.getString("location");
+
+                Event event = new Event(id, title, description, date, startsAt, location);
+                events.add(event);
+            }
+
+            return events;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke hente alle Events");
+        }
+    }
+
+
+    @Override
     public Event createEvent(Event event) throws Exception {
         String query = """
                 INSERT INTO events (title, description, date, starts_at, location) 
@@ -140,6 +174,55 @@ public class EventDAO implements IEventDAO {
         }
     }
 
+    public boolean changeCoordinators(Event event, List<User> added, List<User> removed) throws Exception {
+        String insertQuery = "INSERT INTO events_coordinators (user_id, event_id) VALUES (?, ?)";
+        String deleteQuery = "DELETE FROM events_coordinators WHERE user_id = ? AND event_id = ?";
+
+        Connection conn = null;
+
+        try {
+            conn = dbConnector.getConnection();
+            // start transaktion
+            conn.setAutoCommit(false);
+
+            // fjern koordinatore
+            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery)) {
+                alterCoordinatorBatch(deleteStmt, event, removed); // batch eksikvering
+            }
+
+            // indsæt nye koordinator
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
+                alterCoordinatorBatch(insertStmt, event, added); // batch eksikvering
+            }
+
+            // commit hvis transaktion er OK
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            // rul tilbage hvis transaktion fejler
+            if (conn != null) {
+                try {
+                    conn.rollback(); // kald rollback
+                } catch (Exception ex) {
+                    throw new Exception("Kunne ikke rulle ændringer tilbage i databasen");
+                }
+            }
+            throw new Exception("Kunne ikke ændre koordiator for event", e);
+        } finally {
+            // når det ikke er en try with resources, skal vi selv manuelt lukke forbindelse
+            // til databasen
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (Exception e) {
+                throw new Exception("Kunne ikke lukke forbindelse til databasen", e);
+            }
+        }
+    }
+
+
+
     @Override
     public boolean assignCoordinators(Event event, List<User> users) throws Exception {
         String query =
@@ -148,20 +231,15 @@ public class EventDAO implements IEventDAO {
         try (Connection conn = dbConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            conn.setAutoCommit(false); // Deaktiver automatisk commit for batch
+            // kør batch i en transkation
+            conn.setAutoCommit(false);
 
-            for (User user : users) {
-                stmt.setInt(1, user.getId());
-                stmt.setInt(2, event.getId());
-                stmt.addBatch();
-            }
+            boolean result = alterCoordinatorBatch(stmt, event, users);
 
-            // Udfør batchindsættelsen
-            int[] result = stmt.executeBatch();
-
-            // Commit transaktionen
+            // kør alle vores batch op til DB
             conn.commit();
-            return true;
+
+            return result;
         } catch (SQLException e) {
             throw new Exception("Kunne ikke tilføje koordinator til event", e);
         }
@@ -194,22 +272,42 @@ public class EventDAO implements IEventDAO {
         try (Connection conn = dbConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            conn.setAutoCommit(false); // Deaktiver automatisk commit for batch
+            // kør batch i en transkation
+            conn.setAutoCommit(false);
 
-            for (User user : users) {
-                stmt.setInt(1, user.getId());
-                stmt.setInt(2, event.getId());
-                stmt.addBatch();
-            }
+            boolean result = alterCoordinatorBatch(stmt, event, users);
 
-            // Udfør batchindsættelsen
-            int[] result = stmt.executeBatch();
-
-            // Commit transaktionen
+            // kør alle vores batch op til DB
             conn.commit();
-            return true;
+
+            return result;
         } catch (SQLException e) {
             throw new Exception("Kunne ikke fjerne koordinatore fra event", e);
         }
+    }
+
+    /**
+     *
+     * @param stmt the prepared stmt either insert or delete
+     * @param event affected Event
+     * @param users affected users
+     * @return result from affected Batch
+     * @throws SQLException
+     */
+    private boolean alterCoordinatorBatch(PreparedStatement stmt, Event event, List<User> users) throws SQLException {
+        // sørg for at først ? er user id og 2 er event id
+        for (User user : users) {
+            stmt.setInt(1, user.getId());
+            stmt.setInt(2, event.getId());
+            stmt.addBatch();
+        }
+
+        int[] result = stmt.executeBatch();
+
+        for (int res : result) {
+            if (res > 0)
+                return true;
+        }
+        return false;
     }
 }

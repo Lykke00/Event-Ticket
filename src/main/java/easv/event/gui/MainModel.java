@@ -42,9 +42,9 @@ public class MainModel {
 
     private MainModel() {
         usersModel = new UsersModel();
-
-        eventInteractor = new EventInteractor();
         authInteractor = new AuthInteractor(usersModel);
+
+        eventInteractor = new EventInteractor(authInteractor);
         userInteractor = new UserInteractor(usersModel);
 
         editEventModel = new EditEventModel();
@@ -115,6 +115,4 @@ public class MainModel {
     public EventAssignModel getEventAssignModel() {
         return eventAssignModel;
     }
-
-
 }

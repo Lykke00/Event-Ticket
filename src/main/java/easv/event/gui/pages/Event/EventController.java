@@ -11,6 +11,7 @@ import easv.event.gui.common.EventItemModel;
 import easv.event.gui.interactors.AuthInteractor;
 import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.modals.Modal;
+import easv.event.gui.pages.IPageController;
 import easv.event.gui.pages.Pages;
 import easv.event.gui.utils.*;
 import javafx.beans.binding.Bindings;
@@ -33,7 +34,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class EventController implements Initializable {
+public class EventController implements Initializable, IPageController {
     private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
     private final AuthModel authModel = MainModel.getInstance().getAuthInteractor().getAuthModel();
 
@@ -88,6 +89,11 @@ public class EventController implements Initializable {
         createTableRowClick();
         initializeFilteredList();
         setupTextFieldSearch();
+    }
+
+    @Override
+    public void load() {
+        eventInteractor.initialize();
     }
 
     private void userPermissionView() {
@@ -197,7 +203,7 @@ public class EventController implements Initializable {
                     btnAssign.setOnAction(event -> {
                         EventItemModel item = getTableRow().getItem();
                         if (item != null) {
-                            MainModel.getInstance().getEventAssignModel().eventModelProperty().set(item);
+                            MainModel.getInstance().getEventAssignModel().setEventModelProperty(item);
                             ModalHandler.getInstance().getModalOverlay().showFXML(Modal.EVENT_ASSIGN);
                         }
                     });
