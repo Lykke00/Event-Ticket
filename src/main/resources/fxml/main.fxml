@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
+
 <BorderPane fx:id="mainWindow" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.event.gui.MainController">
    <top>
       <HBox alignment="CENTER_LEFT" prefHeight="51.0" prefWidth="731.0" spacing="5.0" styleClass="header-tab-pane">

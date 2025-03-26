@@ -2,14 +2,11 @@ package easv.event;
 
 import atlantafx.base.theme.PrimerLight;
 import easv.event.gui.pages.Pages;
-import easv.event.gui.utils.ModalHandler;
-import easv.event.gui.utils.NotificationHandler;
+import easv.event.gui.utils.PageData;
+import easv.event.gui.utils.PageHandler;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -23,10 +20,9 @@ public class Main extends Application {
     public void start(Stage stage) throws IOException {
         Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource(Pages.LOGIN.getPath()));
-        Parent root = fxmlLoader.load();
+        PageData pageData = PageHandler.getInstance().storeCurrentPage(Pages.LOGIN);
 
-        Scene scene = new Scene(root);
+        Scene scene = pageData.getPageScene();
         stage.setTitle(TITLE);
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/favicon.png")));
 

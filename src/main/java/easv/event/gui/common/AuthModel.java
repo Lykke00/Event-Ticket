@@ -19,4 +19,9 @@ public class AuthModel {
     public BooleanProperty loggedInProperty() { return loggedIn; }
 
     public BooleanProperty loginFailedProperty() { return loginFailed; }
+
+    public void logout() {
+        userProperty().setValue(null);
+        loggedInProperty().setValue(false);
+    }
 }
