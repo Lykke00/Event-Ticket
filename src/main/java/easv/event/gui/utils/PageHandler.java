@@ -3,6 +3,8 @@ package easv.event.gui.utils;
 import easv.event.gui.pages.Pages;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 
 import java.util.HashMap;
@@ -12,7 +14,7 @@ public class PageHandler {
     private static PageHandler instance;
     private final static Pages DEFAULT_PAGE = Pages.EVENT;
 
-    private Map<Pages, Node> pageCache = new HashMap<>();
+    private Map<Pages, PageData> pageCache = new HashMap<>();
 
     private Pages currentPage;
 
@@ -33,26 +35,45 @@ public class PageHandler {
     }
 
     public void setCurrentPage(Pages page) {
-        if (currentPage != null && page.getPath().equals(currentPage.getPath()))
+        PageData storePageNode = storeCurrentPage(page);
+
+        if (storePageNode == null || storePageNode.getPageParent() == null)
             return;
 
+        this.borderPane.setCenter(storePageNode.getPageParent());
+    }
+
+    public PageData storeCurrentPage(Pages page) {
+        if (currentPage != null && page.getPath().equals(currentPage.getPath()))
+            return pageCache.get(currentPage);
+
         FXMLLoader loader;
-        Node pageNode;
+        Parent pageNode;
+        PageData pageData;
 
         if (!pageCache.containsKey(page)) {
             loader = new FXMLLoader(getClass().getResource(page.getPath()));
             try {
                 pageNode = loader.load();
                 page.setController(loader.getController());
-                pageCache.put(page, pageNode);
+                Scene scene = new Scene(pageNode);
+                pageData = new PageData(pageNode, scene);
+                pageCache.put(page, pageData);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to load page: " + page.getPath(), e);
             }
         } else {
-            pageNode = pageCache.get(page);
+            pageData = pageCache.get(page);
         }
 
         currentPage = page;
-        this.borderPane.setCenter(pageNode);
+        return pageData;
+    }
+
+    public PageData getStoredPage(Pages page) {
+        if (!pageCache.containsKey(page))
+            return null;
+
+        return pageCache.get(page);
     }
 }

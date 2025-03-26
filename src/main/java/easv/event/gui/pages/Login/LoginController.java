@@ -6,9 +6,8 @@ import atlantafx.base.theme.Styles;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.AuthModel;
 import easv.event.gui.interactors.AuthInteractor;
-import easv.event.gui.utils.DialogHandler;
-import easv.event.gui.utils.ModalHandler;
-import easv.event.gui.utils.NotificationHandler;
+import easv.event.gui.pages.Pages;
+import easv.event.gui.utils.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
@@ -35,6 +34,8 @@ public class LoginController implements Initializable {
     private final static int WIDTH = 800;
     private final static int HEIGHT = 600;
     private final static String TITLE = "Event System";
+
+    private boolean loaded = false;
 
     @FXML
     private CustomTextField txtFieldEmail;
@@ -70,8 +71,8 @@ public class LoginController implements Initializable {
         });
 
         txtFieldEmail.textProperty().addListener((observable, oldValue, newValue) -> {
-           if (!newValue.isEmpty())
-               txtFieldEmail.pseudoClassStateChanged(Styles.STATE_DANGER, false);
+            if (!newValue.isEmpty())
+                txtFieldEmail.pseudoClassStateChanged(Styles.STATE_DANGER, false);
         });
 
         txtFieldPassword.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -85,10 +86,10 @@ public class LoginController implements Initializable {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if (newValue) {
-                    txtFieldEmail.pseudoClassStateChanged(Styles.STATE_SUCCESS, true);
-                    txtFieldPassword.pseudoClassStateChanged(Styles.STATE_SUCCESS, true);
-
                     loadApplication();
+
+                    txtFieldEmail.clear();
+                    txtFieldPassword.clear();
                 }
             }
         });
@@ -96,10 +97,17 @@ public class LoginController implements Initializable {
 
     private void loadApplication() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
-            Parent root = loader.load();
-
             Stage stage = (Stage) btnContinue.getScene().getWindow();
+            PageData pageData = PageHandler.getInstance().storeCurrentPage(Pages.MAIN);
+
+            if (loaded) {
+                setStageCenter(stage);
+                stage.setScene(pageData.getPageScene());
+                return;
+            }
+
+           // FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
+            Parent root = pageData.getPageParent();
 
             // StackPane bruges grundet ModalPane, så vi kan vise
             // modals samt evt. notifikationer i fremtiden
@@ -116,20 +124,27 @@ public class LoginController implements Initializable {
             // sæt stackpane til notification
             NotificationHandler.initialize(stackPane);
 
-            stage.setScene(new Scene(stackPane, WIDTH, HEIGHT));
+            Scene scene = new Scene(stackPane, WIDTH, HEIGHT);
+            pageData.setScene(scene);
+
+            stage.setScene(pageData.getPageScene());
             stage.setTitle(TITLE);
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/favicon.png")));
 
-            double screenWidth = Screen.getPrimary().getVisualBounds().getWidth();
-            double screenHeight = Screen.getPrimary().getVisualBounds().getHeight();
-            stage.setX((screenWidth - WIDTH) / 2);
-            stage.setY((screenHeight - HEIGHT) / 2);
+            setStageCenter(stage);
 
             stage.show();
-
+            loaded = true;
         } catch (Exception e) {
             DialogHandler.showExceptionError("Hovsa, fejl!", "Der er desværre sket en fejl, kopier stacktrace og send det til en administrator.", e);
         }
+    }
+
+    private void setStageCenter(Stage stage) {
+        double screenWidth = Screen.getPrimary().getVisualBounds().getWidth();
+        double screenHeight = Screen.getPrimary().getVisualBounds().getHeight();
+        stage.setX((screenWidth - WIDTH) / 2);
+        stage.setY((screenHeight - HEIGHT) / 2);
     }
 
     private boolean isValidEmail(String email) {

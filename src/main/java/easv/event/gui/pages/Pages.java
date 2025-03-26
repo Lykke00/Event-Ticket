@@ -1,6 +1,7 @@
 package easv.event.gui.pages;
 
 public enum Pages {
+    MAIN("/fxml/main.fxml"),
     LOGIN("/fxml/pages/LoginPage.fxml"),
     EVENT("/fxml/pages/EventPage.fxml"),
     TICKETS("/fxml/pages/TicketPage.fxml"),
