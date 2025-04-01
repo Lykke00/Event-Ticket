@@ -50,6 +50,10 @@ public class EventManager {
         return eventDAO.deleteEvent(event);
     }
 
+    public boolean editEvent(Event event) throws Exception {
+        return eventDAO.editEvent(event);
+    }
+
     public List<User> getCoordinatorsForEvent(Event event) throws Exception {
         return eventDAO.getCoordinatorsForEvent(event);
     }

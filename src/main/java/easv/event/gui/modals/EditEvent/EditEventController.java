@@ -161,12 +161,15 @@ public class EditEventController implements Initializable {
     @FXML
     private void btnActionUpdateEvent(ActionEvent actionEvent) {
         EditEventModel itemModel = MainModel.getInstance().getEditEventModel();
+        EventItemModel eventItemModel = itemModel.eventItemModelProperty().get();
 
         itemModel.eventItemModelProperty().get().nameProperty().set(txtFieldName.getText());
         itemModel.eventItemModelProperty().get().descriptionProperty().set(txtAreaDescription.getText());
         itemModel.eventItemModelProperty().get().locationProperty().set(txtFieldLocation.getText());
         itemModel.eventItemModelProperty().get().timeProperty().set(maskTxtFieldTime.getText());
         itemModel.eventItemModelProperty().get().dateProperty().set(datePickr.getValue());
+
+        MainModel.getInstance().getEventInteractor().editEvent(eventItemModel);
 
         modalHandler.hideModal();
     }

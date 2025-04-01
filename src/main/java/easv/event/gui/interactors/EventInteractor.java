@@ -139,6 +139,30 @@ public class EventInteractor {
         );
     }
 
+    public void editEvent(EventItemModel eventItemModel) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        Event event = EventItemModel.toEntity(eventItemModel);
+                        return eventManager.editEvent(event);
+                    } catch (Exception e) {
+                        throw new RuntimeException("En fejl skete ved at prøve at redigere event");
+                    }
+                },
+                updated -> {
+                    if (updated) {
+                        int index = eventModel.eventsListProperty().indexOf(eventItemModel);
+                        if (index != -1) {
+                            eventModel.eventsListProperty().set(index, eventItemModel);
+                        }
+                    }
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke hente data for bruger", exception);
+                }
+        );
+    }
+
     public void changeCoordinatorsForEvent(EventItemModel eventItemModel, List<UserModel> added, List<UserModel> removed) {
         BackgroundTaskExecutor.execute(
                 () -> {

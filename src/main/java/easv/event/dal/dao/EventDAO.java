@@ -3,7 +3,6 @@ package easv.event.dal.dao;
 import easv.event.be.Event;
 import easv.event.be.User;
 import easv.event.dal.DBConnector;
-import easv.event.gui.utils.DialogHandler;
 
 import java.io.IOException;
 import java.sql.*;
@@ -135,6 +134,30 @@ public class EventDAO implements IEventDAO {
             throw new Exception("Kunne ikke slette Event fra databasen");
         }
     }
+
+    @Override
+    public boolean editEvent(Event event) throws Exception {
+        String query = """
+                UPDATE events
+                SET title = ?, description = ?, date = ?, starts_at = ?, location = ?
+                WHERE id = ?
+                """;
+        try (Connection conn = dbConnector.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, event.getTitle());
+            stmt.setString(2, event.getDescription());
+            stmt.setDate(3, Date.valueOf(event.getDate()));
+            stmt.setString(4, event.getStartsAt());
+            stmt.setString(5, event.getLocation());
+            stmt.setInt(6, event.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new Exception("Kunne ikke opdatere event i databasen",e);
+        }
+    }
+
 
     @Override
     public List<User> getCoordinatorsForEvent(Event event) throws Exception {
