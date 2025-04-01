@@ -174,8 +174,6 @@ public class EditEventController implements Initializable {
 
         MainModel.getInstance().getEventInteractor().editEvent(original, copy);
 
-        MainModel.getInstance().getEventInteractor().editEvent(eventItemModel);
-
         modalHandler.hideModal();
     }
 }
