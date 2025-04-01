@@ -138,7 +138,7 @@ public class EventInteractor {
                 }
         );
     }
-
+  
     public void editEvent(EventItemModel original, EventItemModel updatedModel) {
         BackgroundTaskExecutor.execute(
                 () -> {
