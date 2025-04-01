@@ -12,18 +12,20 @@ public class Event {
     private LocalDate date;
     private String startsAt;
     private String location;
+    private boolean active;
 
     private int soldTickets = 0;
     private List<User> coordinators = new ArrayList<>();
 
 
-    public Event(int id, String title, String description, LocalDate date, String startsAt, String location) {
+    public Event(int id, String title, String description, LocalDate date, String startsAt, String location, boolean active) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.date = date;
         this.startsAt = startsAt;
         this.location = location;
+        this.active = active;
     }
 
     public Event(String title, String description, LocalDate date, String startsAt, String location) {
@@ -96,6 +98,10 @@ public class Event {
 
     public void addCoordinator(User coordinator) {
         this.coordinators.add(coordinator);
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     @Override

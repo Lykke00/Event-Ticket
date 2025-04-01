@@ -1,30 +1,87 @@
 package easv.event.gui.pages.Event;
 
 import easv.event.gui.common.EventItemModel;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class EventModel {
     private final ObservableList<EventItemModel> events = FXCollections.observableArrayList();
+    private final StringProperty currentListSort = new SimpleStringProperty();
+    private FilteredList<EventItemModel> filteredEvents;
+
+    public EventModel() {
+        filteredEvents = new FilteredList<>(events);  // Bind filteredEvents til events listen
+        initListListener();
+    }
 
     public ObservableList<EventItemModel> eventsListProperty() {
-        return events;
+        return filteredEvents;  // Returner den filtrerede liste
+    }
+
+    public void updateEvents(List<EventItemModel> newEvents) {
+        events.setAll(newEvents);  // Opdater den oprindelige events liste
+    }
+
+    public void addEvent(EventItemModel model) {
+        events.add(model);
     }
 
     public SortedList<EventItemModel> getSortedEventsList() {
-        return new SortedList<>(events, (event1, event2) -> Integer.compare(event2.idProperty().get(), event1.idProperty().get()));
+        return new SortedList<>(filteredEvents, (event1, event2) -> Integer.compare(event2.idProperty().get(), event1.idProperty().get()));
     }
 
     public FilteredList<EventItemModel> getCompletedEventsList() {
-        return new FilteredList<>(events, event -> event.dateProperty().get().isBefore(LocalDate.now()));
+        return new FilteredList<>(filteredEvents, event -> event.dateProperty().get().isBefore(LocalDate.now()));
     }
 
     public FilteredList<EventItemModel> getUpcomingEventsList() {
-        return new FilteredList<>(events, event -> !event.dateProperty().get().isBefore(LocalDate.now()));
+        return new FilteredList<>(filteredEvents, event -> !event.dateProperty().get().isBefore(LocalDate.now()));
+    }
+
+    public StringProperty currentListProperty() {
+        return currentListSort;
+    }
+
+    // Lytter på ændringer i currentListSort og opdaterer eventlisten
+    public void initListListener() {
+        currentListSort.addListener((observable, oldValue, newValue) -> {
+            switch (newValue) {
+                case "Aktive events":
+                    filterActiveEvents();
+                    break;
+                case "Inaktive events":
+                    filterInactiveEvents();
+                    break;
+                case "Alle events":
+                    resetFilter();
+                    break;
+                default:
+                    resetFilter();
+                    break;
+            }
+        });
+    }
+
+    // Filtrerer kun aktive events
+    private void filterActiveEvents() {
+        filteredEvents.setPredicate(event -> event.activeProperty().get());
+    }
+
+    // Filtrerer kun inaktive events
+    private void filterInactiveEvents() {
+        filteredEvents.setPredicate(event -> !event.activeProperty().get());
+    }
+
+    // Nulstil filteret og viser alle events
+    private void resetFilter() {
+        filteredEvents.setPredicate(event -> true);  // Alle events vises
     }
 
     public boolean deleteEvent(EventItemModel item) {

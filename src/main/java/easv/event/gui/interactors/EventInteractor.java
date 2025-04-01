@@ -11,6 +11,8 @@ import easv.event.gui.modals.EventAssign.EventAssignModel;
 import easv.event.gui.pages.Event.EventModel;
 import easv.event.gui.utils.BackgroundTaskExecutor;
 import easv.event.gui.utils.DialogHandler;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 
 import java.util.List;
@@ -51,7 +53,9 @@ public class EventInteractor {
                     List<EventItemModel> eventItemModels = eventsForUser.stream()
                             .map(EventItemModel::fromEntity)
                             .toList();
-                    eventModel.eventsListProperty().setAll(eventItemModels);
+
+                    eventModel.updateEvents(eventItemModels);
+                    //eventModel.eventsListProperty().setAll(eventItemModels);
                 },
                 exception -> {
                     DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke hente data for bruger", exception);
@@ -127,7 +131,7 @@ public class EventInteractor {
                 },
                 createdEvent -> {
                     EventItemModel createdEventItemModel = EventItemModel.fromEntity(createdEvent);
-                    eventModel.eventsListProperty().add(createdEventItemModel);
+                    eventModel.addEvent(createdEventItemModel);
                 },
                 exception -> {
                     DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke hente data for bruger", exception);

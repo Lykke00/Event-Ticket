@@ -19,10 +19,11 @@ public class EventItemModel {
 
     private final StringProperty location = new SimpleStringProperty();
     private final IntegerProperty soldTickets = new SimpleIntegerProperty();
+    private final BooleanProperty active = new SimpleBooleanProperty();
 
     private final ObservableList<UserModel> coordinators = FXCollections.observableArrayList();
 
-    public EventItemModel(int id, String name, String description, String location, int soldTickets, String time, LocalDate date) {
+    public EventItemModel(int id, String name, String description, String location, int soldTickets, String time, LocalDate date, boolean active) {
         this.id.set(id);
         this.name.set(name);
         this.description.set(description);
@@ -30,24 +31,26 @@ public class EventItemModel {
         this.soldTickets.set(soldTickets);
         this.time.set(time);
         this.date.set(date);
+        this.active.set(active);
     }
 
-    public EventItemModel(String name, String description, String location, String time, LocalDate date) {
+    public EventItemModel(String name, String description, String location, String time, LocalDate date, boolean active) {
         this.name.set(name);
         this.description.set(description);
         this.location.set(location);
         this.time.set(time);
         this.date.set(date);
+        this.active.set(active);
     }
 
-    public EventItemModel(int id, String name, String description, String location, int soldTickets, String time, LocalDate date, ObservableList<UserModel> coordinators) {
+    public EventItemModel(int id, String name, String description, String location, int soldTickets, String time, LocalDate date, ObservableList<UserModel> coordinators, boolean active) {
         this.id.set(id);
         this.name.set(name);
         this.description.set(description);
         this.location.set(location);
         this.soldTickets.set(soldTickets);
         this.time.set(time);
-
+        this.active.set(active);
         this.date.set(date);
         this.coordinators.addAll(coordinators);
     }
@@ -84,17 +87,21 @@ public class EventItemModel {
         return coordinators;
     }
 
+    public BooleanProperty activeProperty() {
+        return active;
+    }
+
     public static EventItemModel fromEntity(Event event) {
         List<UserModel> coordinatorModels = event.getCoordinators().stream()
                 .map(UserModel::fromEntity)
                 .toList();
 
-        return new EventItemModel(event.getId(), event.getTitle(), event.getDescription(), event.getLocation(), event.getSoldTickets(), event.getStartsAt(), event.getDate(), FXCollections.observableArrayList(coordinatorModels));
+        return new EventItemModel(event.getId(), event.getTitle(), event.getDescription(), event.getLocation(), event.getSoldTickets(), event.getStartsAt(), event.getDate(), FXCollections.observableArrayList(coordinatorModels), event.isActive());
     }
 
 
     public static Event toEntity(EventItemModel eventItemModel) {
-        return new Event(eventItemModel.idProperty().get(), eventItemModel.nameProperty().get(), eventItemModel.descriptionProperty().get(), eventItemModel.dateProperty().get(), eventItemModel.timeProperty().get(), eventItemModel.locationProperty().get());
+        return new Event(eventItemModel.idProperty().get(), eventItemModel.nameProperty().get(), eventItemModel.descriptionProperty().get(), eventItemModel.dateProperty().get(), eventItemModel.timeProperty().get(), eventItemModel.locationProperty().get(), eventItemModel.activeProperty().get());
     }
 
     @Override

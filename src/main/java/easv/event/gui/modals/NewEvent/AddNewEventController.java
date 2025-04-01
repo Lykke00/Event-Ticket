@@ -130,7 +130,7 @@ public class AddNewEventController implements Initializable {
 
     @FXML
     private void btnActionCreateEvent(ActionEvent actionEvent) throws Exception {
-        eventInteractor.createEvent(new EventItemModel(txtFieldName.getText(), txtAreaDescription.getText(), txtFieldLocation.getText(), maskTxtFieldTime.getText(), datePickr.getValue()));
+        eventInteractor.createEvent(new EventItemModel(txtFieldName.getText(), txtAreaDescription.getText(), txtFieldLocation.getText(), maskTxtFieldTime.getText(), datePickr.getValue(), true));
         modalHandler.hideModal();
     }
 }

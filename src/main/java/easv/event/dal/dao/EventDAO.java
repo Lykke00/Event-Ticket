@@ -44,8 +44,9 @@ public class EventDAO implements IEventDAO {
                 LocalDate date = rs.getDate("date").toLocalDate();
                 String startsAt = rs.getString("starts_at");
                 String location = rs.getString("location");
+                boolean active = rs.getBoolean("active");
 
-                Event event = new Event(id, title, description, date, startsAt, location);
+                Event event = new Event(id, title, description, date, startsAt, location, active);
                 events.add(event);
             }
 
@@ -77,8 +78,9 @@ public class EventDAO implements IEventDAO {
                 LocalDate date = rs.getDate("date").toLocalDate();
                 String startsAt = rs.getString("starts_at");
                 String location = rs.getString("location");
+                boolean active = rs.getBoolean("active");
 
-                Event event = new Event(id, title, description, date, startsAt, location);
+                Event event = new Event(id, title, description, date, startsAt, location, active);
                 events.add(event);
             }
 
@@ -162,7 +164,6 @@ public class EventDAO implements IEventDAO {
                 String email = rs.getString("email");
                 String role = rs.getString("name");
                 String location = rs.getString("location");
-
 
                 User user = new User(id, firstName, lastName, email, role, location);
                 users.add(user);

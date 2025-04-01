@@ -47,6 +47,10 @@ public class EventController implements Initializable, IPageController {
     private int finishedEvents = 0;
     private int upcomingEvents = 0;
 
+    private final static String ALL_EVENTS = "Alle events";
+    private final static String ACTIVE_EVENTS = "Aktive events";
+    private final static String INACTIVE_EVENTS = "Inaktive events";
+
     @FXML
     private TableView<EventItemModel> tblViewEvents;
 
@@ -71,6 +75,9 @@ public class EventController implements Initializable, IPageController {
     @FXML
     private Button btnAddNewEvent;
 
+    @FXML
+    private ComboBox<String> cmbBoxEvents;
+
     public EventController() {}
 
     @Override
@@ -80,6 +87,8 @@ public class EventController implements Initializable, IPageController {
 
         Tooltip createEventToolTip = new Tooltip("Opret nyt event");
         btnAddNewEvent.setTooltip(createEventToolTip);
+
+        loadSortEventBox();
 
         //TODO: User permission, tilføj tilbage når alt er lavet
         //userPermissionView();
@@ -94,6 +103,16 @@ public class EventController implements Initializable, IPageController {
     @Override
     public void load() {
         eventInteractor.initialize();
+    }
+
+    private void loadSortEventBox() {
+        cmbBoxEvents.getItems().add(ALL_EVENTS);
+        cmbBoxEvents.getItems().add(ACTIVE_EVENTS);
+        cmbBoxEvents.getItems().add(INACTIVE_EVENTS);
+
+        cmbBoxEvents.setValue(ACTIVE_EVENTS);
+
+        eventInteractor.getEventModel().currentListProperty().bind(cmbBoxEvents.valueProperty());
     }
 
     private void userPermissionView() {
@@ -142,9 +161,38 @@ public class EventController implements Initializable, IPageController {
         ModalHandler.getInstance().getModalOverlay().showFXML(Modal.EVENT_EDIT);
     }
 
+    private void updateRowStyle(TableRow<EventItemModel> row, EventItemModel item, boolean red) {
+        if (item.activeProperty().get()) {
+            row.setStyle(""); // Standard styling
+        } else {
+            row.setStyle("-fx-background-color: rgba(255, 0, 0, 0.2);"); // Svag rød baggrund
+        }
+    }
+
     private void updateTableView() {
         Label lblNoEvents = new Label("Ingen events fundet");
         lblNoEvents.getStyleClass().add(Styles.TEXT_SUBTLE);
+
+        tblViewEvents.setRowFactory(tv -> new TableRow<>() {
+            @Override
+            protected void updateItem(EventItemModel item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setStyle(""); // Nulstil styling
+                } else {
+                    // Dynamisk binding til activeProperty()
+                    eventInteractor.getEventModel().currentListProperty().addListener((observable, oldValue, newValue) -> {
+                        updateRowStyle(this, item, newValue.equals("Alle events"));
+                    });
+                 //   item.activeProperty().addListener((obs, oldVal, newVal) -> {
+                  //      updateRowStyle(this, item);
+                  //  });
+                    updateRowStyle(this, item, false); // Opdater første gang
+                }
+            }
+        });
+
 
         tblViewEvents.setPlaceholder(lblNoEvents);
 
