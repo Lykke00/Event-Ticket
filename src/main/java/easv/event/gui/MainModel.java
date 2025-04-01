@@ -3,6 +3,7 @@ package easv.event.gui;
 import easv.event.gui.common.EventItemModel;
 import easv.event.gui.interactors.AuthInteractor;
 import easv.event.gui.interactors.EventInteractor;
+import easv.event.gui.interactors.TicketInteractor;
 import easv.event.gui.interactors.UserInteractor;
 import easv.event.gui.modals.EditEvent.EditEventModel;
 import easv.event.gui.modals.EditTicket.EditTicketModel;
@@ -21,6 +22,7 @@ public class MainModel {
 
     private EventInteractor eventInteractor;
     private AuthInteractor authInteractor;
+    private TicketInteractor ticketInteractor;
 
     private final UserInteractor userInteractor;
 
@@ -47,6 +49,8 @@ public class MainModel {
         eventInteractor = new EventInteractor(authInteractor);
         userInteractor = new UserInteractor(usersModel);
 
+        ticketInteractor = new TicketInteractor();
+
         editEventModel = new EditEventModel();
         eventItemModel = new EventItemPageModel();
 
@@ -59,9 +63,6 @@ public class MainModel {
         userEditModel = new UserEditModel();
 
         eventAssignModel = new EventAssignModel();
-
-        // test
-        ticketModel.ticketItemModelsListProperty().addAll(TestData.ticketTestData());
     }
 
     public static MainModel getInstance() {
@@ -78,6 +79,10 @@ public class MainModel {
 
     public AuthInteractor getAuthInteractor() {
         return authInteractor;
+    }
+
+    public TicketInteractor getTicketInteractor() {
+        return ticketInteractor;
     }
 
     public EventItemPageModel getEventItemModel() {

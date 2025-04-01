@@ -106,10 +106,7 @@ public class EventController implements Initializable, IPageController {
     }
 
     private void loadSortEventBox() {
-        cmbBoxEvents.getItems().add(ALL_EVENTS);
-        cmbBoxEvents.getItems().add(ACTIVE_EVENTS);
-        cmbBoxEvents.getItems().add(INACTIVE_EVENTS);
-
+        cmbBoxEvents.getItems().addAll(ALL_EVENTS, ACTIVE_EVENTS, INACTIVE_EVENTS);
         cmbBoxEvents.setValue(ACTIVE_EVENTS);
 
         eventInteractor.getEventModel().currentListProperty().bind(cmbBoxEvents.valueProperty());
@@ -185,9 +182,9 @@ public class EventController implements Initializable, IPageController {
                     eventInteractor.getEventModel().currentListProperty().addListener((observable, oldValue, newValue) -> {
                         updateRowStyle(this, item, newValue.equals("Alle events"));
                     });
-                 //   item.activeProperty().addListener((obs, oldVal, newVal) -> {
-                  //      updateRowStyle(this, item);
-                  //  });
+                    //   item.activeProperty().addListener((obs, oldVal, newVal) -> {
+                    //      updateRowStyle(this, item);
+                    //  });
                     updateRowStyle(this, item, false); // Opdater første gang
                 }
             }

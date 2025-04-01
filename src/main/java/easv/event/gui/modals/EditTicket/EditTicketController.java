@@ -2,7 +2,7 @@ package easv.event.gui.modals.EditTicket;
 
 import easv.event.gui.MainModel;
 import easv.event.gui.common.TicketItemModel;
-import easv.event.gui.common.TicketType;
+import easv.event.gui.common.TicketTypeItemModel;
 import easv.event.gui.utils.ModalHandler;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.Property;
@@ -26,7 +26,7 @@ public class EditTicketController implements Initializable {
     private Label lblTitle, lblDescription;
 
     @FXML
-    private ChoiceBox<TicketType> choiceBoxType;
+    private ChoiceBox<TicketTypeItemModel> choiceBoxType;
 
     @FXML
     private Button btnCreateTicket;
@@ -87,9 +87,9 @@ public class EditTicketController implements Initializable {
     }
 
     private void setupChoiceBox() {
-        TicketType[] values = TicketType.values();
-        for (TicketType value : values)
-            choiceBoxType.getItems().add(value);
+        //icketType[] values = TicketType.values();
+        // for (TicketType value : values)
+        //    choiceBoxType.getItems().add(value);
 
         choiceBoxType.getSelectionModel().selectFirst();
     }

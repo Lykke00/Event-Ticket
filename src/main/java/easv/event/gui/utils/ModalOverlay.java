@@ -38,8 +38,8 @@ public class ModalOverlay extends ModalPane {
             // Hvis det er en scrollpane og har styleclassen scrollable-content
             boolean isStackPane = target instanceof StackPane;
             if (isStackPane && target.getStyleClass().contains("scrollable-content") ||
-                isStackPane && target.getStyleClass().contains("close-button") ||
-                isStackPane && target.getStyleClass().contains("icon")) {
+                    isStackPane && target.getStyleClass().contains("close-button") ||
+                    isStackPane && target.getStyleClass().contains("icon")) {
                 event.consume();
                 hide();
             }
@@ -55,6 +55,9 @@ public class ModalOverlay extends ModalPane {
 
     @Override
     public void hide() {
+        if (getContent() == null)
+            return;
+
         Animation outAnimation = outTransitionFactory.get().apply(getContent());
         outAnimation.setOnFinished(evt -> super.hide(true));
         outAnimation.play();

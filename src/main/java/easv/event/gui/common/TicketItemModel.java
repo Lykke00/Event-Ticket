@@ -1,5 +1,6 @@
 package easv.event.gui.common;
 
+import easv.event.be.Ticket;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -7,19 +8,24 @@ import javafx.collections.ObservableList;
 public class TicketItemModel {
     private final SimpleIntegerProperty id = new SimpleIntegerProperty();
     private final SimpleStringProperty name = new SimpleStringProperty();
-    private final ObjectProperty<TicketType> type = new SimpleObjectProperty<>();
+    private final ObjectProperty<TicketTypeItemModel> type = new SimpleObjectProperty<>();
 
     private final ObservableList<TicketEventItemModel> ticketEventItemModels = FXCollections.observableArrayList();
 
-    public TicketItemModel(int id, String name, TicketType type, ObservableList<TicketEventItemModel> ticketEventItemModels) {
+    public TicketItemModel(int id, String name, TicketTypeItemModel type, ObservableList<TicketEventItemModel> ticketEventItemModels) {
         this.id.set(id);
         this.name.set(name);
         this.type.set(type);
         this.ticketEventItemModels.addAll(ticketEventItemModels);
     }
 
-    public TicketItemModel(int id, String name, TicketType type) {
+    public TicketItemModel(int id, String name, TicketTypeItemModel type) {
         this.id.set(id);
+        this.name.set(name);
+        this.type.set(type);
+    }
+
+    public TicketItemModel(String name, TicketTypeItemModel type) {
         this.name.set(name);
         this.type.set(type);
     }
@@ -32,7 +38,7 @@ public class TicketItemModel {
         return name;
     }
 
-    public ObjectProperty<TicketType> typeProperty() {
+    public ObjectProperty<TicketTypeItemModel> typeProperty() {
         return type;
     }
 
@@ -41,9 +47,17 @@ public class TicketItemModel {
         return ticketEventItemModels;
     }
 
-    public static boolean updateTicketItemModel(TicketItemModel ticketItemModel, String name, TicketType type) {
+    public static boolean updateTicketItemModel(TicketItemModel ticketItemModel, String name, TicketTypeItemModel type) {
         ticketItemModel.nameProperty().set(name);
         ticketItemModel.typeProperty().set(type);
         return true;
+    }
+
+    public static TicketItemModel fromEntity(Ticket ticket) {
+        return new TicketItemModel(ticket.getId(), ticket.getName(), TicketTypeItemModel.fromEntity(ticket.getTicketType()));
+    }
+
+    public Ticket toEntity() {
+        return new Ticket(idProperty().get(), nameProperty().get(), TicketTypeItemModel.toEntity(typeProperty().get()));
     }
 }

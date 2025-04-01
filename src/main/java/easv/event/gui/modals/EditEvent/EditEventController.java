@@ -162,11 +162,16 @@ public class EditEventController implements Initializable {
     private void btnActionUpdateEvent(ActionEvent actionEvent) {
         EditEventModel itemModel = MainModel.getInstance().getEditEventModel();
 
-        itemModel.eventItemModelProperty().get().nameProperty().set(txtFieldName.getText());
-        itemModel.eventItemModelProperty().get().descriptionProperty().set(txtAreaDescription.getText());
-        itemModel.eventItemModelProperty().get().locationProperty().set(txtFieldLocation.getText());
-        itemModel.eventItemModelProperty().get().timeProperty().set(maskTxtFieldTime.getText());
-        itemModel.eventItemModelProperty().get().dateProperty().set(datePickr.getValue());
+        EventItemModel original = itemModel.eventItemModelProperty().get();
+        EventItemModel copy = EventItemModel.copy(original);
+
+        copy.nameProperty().set(txtFieldName.getText());
+        copy.descriptionProperty().set(txtAreaDescription.getText());
+        copy.locationProperty().set(txtFieldLocation.getText());
+        copy.timeProperty().set(maskTxtFieldTime.getText());
+        copy.dateProperty().set(datePickr.getValue());
+
+        MainModel.getInstance().getEventInteractor().editEvent(original, copy);
 
         modalHandler.hideModal();
     }

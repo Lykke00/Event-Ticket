@@ -31,9 +31,7 @@ public class AuthInteractor {
         BackgroundTaskExecutor.execute(
                 () -> {
                     try {
-                        authModel.databaseLoadProperty().set(true);
                         authModel.loginFailedProperty().set(false);
-
                         return userManager.authenticateUser(email, password);
                     } catch (Exception e) {
                         if (e.getMessage().equals("DOESNT_EXIST") || e.getMessage().equals("PASSWORD_INCORRECT")) {
@@ -44,17 +42,18 @@ public class AuthInteractor {
                     }
                 },
                 user -> {
-                    authModel.databaseLoadProperty().set(false);
                     UserModel loggedinModel = UserModel.fromEntity(user);
                     authModel.userProperty().set(loggedinModel);
                     authModel.loggedInProperty().set(true);
                 },
                 exception -> {
-                    authModel.databaseLoadProperty().set(false);
                     if (authModel.loginFailedProperty().get())
                         return;
 
                     DialogHandler.showExceptionError("Database fejl", "Kunne ikke logge bruger ind", exception);
+                },
+                loading -> {
+                    authModel.databaseLoadProperty().set(loading);
                 }
         );
     }
@@ -82,4 +81,3 @@ public class AuthInteractor {
         return authModel;
     }
 }
-

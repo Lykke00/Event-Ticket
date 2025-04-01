@@ -26,7 +26,7 @@
          </children>
       </VBox>
       <Separator prefHeight="16.0" prefWidth="236.0" />
-      <VBox prefHeight="105.0" prefWidth="286.0" spacing="10.0">
+      <VBox fx:id="vBox" prefHeight="105.0" prefWidth="286.0" spacing="10.0">
          <children>
             <VBox prefHeight="42.0" prefWidth="325.0">
                <children>
