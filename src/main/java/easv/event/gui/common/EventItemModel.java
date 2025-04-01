@@ -91,6 +91,17 @@ public class EventItemModel {
         return active;
     }
 
+    public void updateModel(EventItemModel eventItemModel) {
+        this.id.set(eventItemModel.idProperty().get());
+        this.name.set(eventItemModel.nameProperty().get());
+        this.description.set(eventItemModel.descriptionProperty().get());
+        this.location.set(eventItemModel.locationProperty().get());
+        this.soldTickets.set(eventItemModel.soldTicketsProperty().get());
+        this.time.set(eventItemModel.timeProperty().get());
+        this.date.set(eventItemModel.dateProperty().get());
+        this.active.set(eventItemModel.activeProperty().get());
+    }
+
     public static EventItemModel fromEntity(Event event) {
         List<UserModel> coordinatorModels = event.getCoordinators().stream()
                 .map(UserModel::fromEntity)
@@ -99,9 +110,12 @@ public class EventItemModel {
         return new EventItemModel(event.getId(), event.getTitle(), event.getDescription(), event.getLocation(), event.getSoldTickets(), event.getStartsAt(), event.getDate(), FXCollections.observableArrayList(coordinatorModels), event.isActive());
     }
 
-
     public static Event toEntity(EventItemModel eventItemModel) {
         return new Event(eventItemModel.idProperty().get(), eventItemModel.nameProperty().get(), eventItemModel.descriptionProperty().get(), eventItemModel.dateProperty().get(), eventItemModel.timeProperty().get(), eventItemModel.locationProperty().get(), eventItemModel.activeProperty().get());
+    }
+
+    public static EventItemModel copy(EventItemModel eventItemModel) {
+        return new EventItemModel(eventItemModel.idProperty().get(), eventItemModel.nameProperty().get(), eventItemModel.descriptionProperty().get(), eventItemModel.locationProperty().get(), eventItemModel.soldTicketsProperty().get(), eventItemModel.timeProperty().get(), eventItemModel.dateProperty().get(), eventItemModel.coordinatorsProperty(), eventItemModel.activeProperty().get());
     }
 
     @Override

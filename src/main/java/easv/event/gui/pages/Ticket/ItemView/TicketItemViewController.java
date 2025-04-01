@@ -72,7 +72,7 @@ public class TicketItemViewController implements Initializable {
 
         Label descriptionLabel = new Label();
         StringBinding titleDescBinding = Bindings.createStringBinding(() -> {
-            String type = ticketItemModel.typeProperty().get() != null ? ticketItemModel.typeProperty().get().getType() : "Ukendt dato";
+            String type = ticketItemModel.typeProperty().get() != null ? ticketItemModel.typeProperty().get().nameProperty().get() : "Ukendt type";
             return String.format("Type: %s", type);
         }, ticketItemModel.typeProperty());
 
@@ -96,7 +96,7 @@ public class TicketItemViewController implements Initializable {
         btnEdit.setOnAction(event -> editTicketItem(ticketItemModel));
         btnAddEvent.setOnAction(event -> ModalHandler.getInstance().getModalOverlay().showFXML(Modal.TICKET_ADD_EVENT));
         btnDelete.setOnAction(event -> DialogHandler.showConfirmationDialog(
-                "Bekræft slet Billet",
+                "Bekræft slet billet",
                 "Bekræft slet af " + ticketItemModel.nameProperty().get(),
                 "Bemærk, hvis du sletter dette, er billetten \"" + ticketItemModel.nameProperty().get() + "\" væk for altid. \n\nEr du sikker på at du vil fortsætte?",
                 () -> {

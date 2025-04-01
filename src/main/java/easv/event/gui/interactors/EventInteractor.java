@@ -138,24 +138,20 @@ public class EventInteractor {
                 }
         );
     }
-
-    public void editEvent(EventItemModel eventItemModel) {
+  
+    public void editEvent(EventItemModel original, EventItemModel updatedModel) {
         BackgroundTaskExecutor.execute(
                 () -> {
                     try {
-                        Event event = EventItemModel.toEntity(eventItemModel);
+                        Event event = EventItemModel.toEntity(updatedModel);
                         return eventManager.editEvent(event);
                     } catch (Exception e) {
                         throw new RuntimeException("En fejl skete ved at prøve at redigere event");
                     }
                 },
                 updated -> {
-                    if (updated) {
-                        int index = eventModel.eventsListProperty().indexOf(eventItemModel);
-                        if (index != -1) {
-                            eventModel.eventsListProperty().set(index, eventItemModel);
-                        }
-                    }
+                    if (updated)
+                        original.updateModel(updatedModel);
                 },
                 exception -> {
                     DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke hente data for bruger", exception);
@@ -198,7 +194,6 @@ public class EventInteractor {
         BackgroundTaskExecutor.execute(
                 () -> { // Hvad skal baggrundstråden køre?
                     try {
-                        model.loadingFromDatabaseProperty().set(true);
                         Event event = EventItemModel.toEntity(model.eventItemModel());
                         return eventManager.getCoordinatorsForEvent(event);
                     } catch (Exception e) {
@@ -211,11 +206,12 @@ public class EventInteractor {
                             .toList();
 
                     model.eventItemModel().coordinatorsProperty().setAll(coordinatorModels);
-                    model.loadingFromDatabaseProperty().set(false);
                 },
                 exception -> { //hvis nu en fejl sker
-                    model.loadingFromDatabaseProperty().set(false);
                     DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke få fat i koordinatore for Event", exception);
+                },
+                loading -> {
+                    model.loadingFromDatabaseProperty().set(loading);
                 }
         );
     }

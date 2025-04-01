@@ -1,19 +1,16 @@
 package easv.event.be;
 
-public class Ticket {
+public class TicketType {
     private int id;
     private String name;
-    private TicketType ticketType;
 
-    public Ticket(int id, String name, TicketType ticketType) {
+    public TicketType(int id, String name) {
         this.id = id;
         this.name = name;
-        this.ticketType = ticketType;
     }
 
-    public Ticket(String name, TicketType ticketType) {
+    public TicketType(String name) {
         this.name = name;
-        this.ticketType = ticketType;
     }
 
     public int getId() {
@@ -32,20 +29,11 @@ public class Ticket {
         this.name = name;
     }
 
-    public TicketType getTicketType() {
-        return ticketType;
-    }
-
-    public void setTicketType(TicketType ticketType) {
-        this.ticketType = ticketType;
-    }
-
     @Override
     public String toString() {
-        return "Tickets{" +
+        return "TicketType{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", type=" + ticketType.toString() +
                 '}';
     }
 }

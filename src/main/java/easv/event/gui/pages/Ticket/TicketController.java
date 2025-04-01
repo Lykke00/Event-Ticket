@@ -2,9 +2,12 @@ package easv.event.gui.pages.Ticket;
 
 import atlantafx.base.controls.CustomTextField;
 import atlantafx.base.theme.Styles;
+import atlantafx.base.theme.Tweaks;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.TicketItemModel;
+import easv.event.gui.common.TicketTypeItemModel;
+import easv.event.gui.interactors.TicketInteractor;
 import easv.event.gui.modals.Modal;
 import easv.event.gui.pages.Pages;
 import easv.event.gui.utils.ButtonStyle;
@@ -28,9 +31,25 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class TicketController implements Initializable {
-    private final TicketModel model = MainModel.getInstance().getTicketModel();
+    private final TicketInteractor ticketInteractor = MainModel.getInstance().getTicketInteractor();
+
+    private final static String TICKETS = "Billetter";
+    private final static String TICKET_TYPES = "Billet typer";
+
     private SortedList<TicketItemModel> sortedTicketList;
     private FilteredList<TicketItemModel> filteredTicketList;
+
+    private SortedList<TicketTypeItemModel> sortedTicketListTypes;
+    private FilteredList<TicketTypeItemModel> filteredTicketListTypes;
+
+    @FXML
+    private ComboBox<String> comboBoxSort;
+
+    @FXML
+    private TableView<TicketTypeItemModel> tblViewTicketTypes;
+
+    @FXML
+    private TableColumn<TicketTypeItemModel, String> tblColTicketTypeName;
 
     @FXML
     private TableView<TicketItemModel> tblViewTickets;
@@ -48,35 +67,84 @@ public class TicketController implements Initializable {
     private CustomTextField txtFieldSearch;
 
     @FXML
-    private Button btnAddNewTicket;
+    private MenuButton menuBtnNewTicket;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Tooltip addToolTip = new Tooltip("Tilføj ny Billet");
-        btnAddNewTicket.setTooltip(addToolTip);
-
-        ButtonStyle.setPrimary(btnAddNewTicket, new FontIcon(Feather.PLUS));
-        txtFieldSearch.setLeft(new FontIcon(Feather.SEARCH));
-
+        setupAddMenuButton();
+        setupComboBoxSort();
         initializeFilteredList();
+        initializeFilteredListTicketTypes();
         setupTextFieldSearch();
         setTableData();
+        setTableDataTicketType();
+    }
+
+    private void setupAddMenuButton() {
+        Tooltip addToolTip = new Tooltip("Tilføj ny Billet eller Billet Type");
+
+        menuBtnNewTicket.setTooltip(addToolTip);
+        menuBtnNewTicket.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Tweaks.NO_ARROW);
+        menuBtnNewTicket.setGraphic(new FontIcon(Feather.PLUS));
+
+        menuBtnNewTicket.getItems().clear();
+        menuBtnNewTicket.getItems().setAll(
+                new MenuItem("Ny Billet") {{
+                    setOnAction(event -> ModalHandler.getInstance().getModalOverlay().showFXML(Modal.TICKET_ADD_NEW));
+                }},
+                new MenuItem("Ny Billet Type") {{
+                    setOnAction(event -> ModalHandler.getInstance().getModalOverlay().showFXML(Modal.TICKET_ADD_NEW_TYPE));
+                }}
+        );
+    }
+
+    private void setupComboBoxSort() {
+        comboBoxSort.getItems().addAll(TICKETS, TICKET_TYPES);
+        comboBoxSort.setValue(TICKETS);
+
+        switchTableView(); //opsæt på start fat det
+
+        comboBoxSort.setOnAction(event -> {
+            switchTableView();
+        });
+    }
+
+    private void switchTableView() {
+        boolean tickets = comboBoxSort.getValue().equals(TICKETS);
+        boolean ticketTypes = comboBoxSort.getValue().equals(TICKET_TYPES);
+
+        tblViewTickets.setVisible(tickets && !ticketTypes);
+        tblViewTicketTypes.setVisible(!tickets && ticketTypes);
+
+        if (ticketTypes)
+            ticketInteractor.loadAllTicketTypes();
+
+        if (tickets)
+            ticketInteractor.loadAllTickets();
     }
 
     private void setupTextFieldSearch() {
         txtFieldSearch.textProperty().addListener((observable, oldValue, newValue) -> {
-            filteredTicketList.setPredicate(eventItemModel -> {
+            filteredTicketList.setPredicate(ticketItemModel -> {
                 if (newValue == null || newValue.isEmpty())
                     return true;
 
                 String lowerCaseFilter = newValue.toLowerCase();
-                return eventItemModel.nameProperty().get().toLowerCase().contains(lowerCaseFilter);
+                return ticketItemModel.nameProperty().get().toLowerCase().contains(lowerCaseFilter);
+            });
+
+            filteredTicketListTypes.setPredicate(ticketTypeItemModel -> {
+                if (newValue == null || newValue.isEmpty())
+                    return true;
+
+                String lowerCaseFilter = newValue.toLowerCase();
+                return ticketTypeItemModel.nameProperty().get().toLowerCase().contains(lowerCaseFilter);
             });
         });
     }
 
     private void initializeFilteredList() {
-        filteredTicketList = new FilteredList<>(model.getSortedTicketItemModelsList(), p -> true);
+        filteredTicketList = new FilteredList<>(ticketInteractor.getTicketModel().getSortedTicketItemModelsList(), p -> true);
         sortedTicketList = new SortedList<>(filteredTicketList);
 
         sortedTicketList.comparatorProperty().bind(tblViewTickets.comparatorProperty());
@@ -84,8 +152,17 @@ public class TicketController implements Initializable {
         tblViewTickets.setItems(sortedTicketList);
     }
 
+    private void initializeFilteredListTicketTypes() {
+        filteredTicketListTypes = new FilteredList<>(ticketInteractor.getTicketTypeModel().getSortedTicketItemModelsList(), p -> true);
+        sortedTicketListTypes = new SortedList<>(filteredTicketListTypes);
+
+        sortedTicketListTypes.comparatorProperty().bind(tblViewTicketTypes.comparatorProperty());
+
+        tblViewTicketTypes.setItems(sortedTicketListTypes);
+    }
+
     private void setTableData() {
-        Label lblNoTickets = new Label("Ingen tickets fundet");
+        Label lblNoTickets = new Label("Ingen billetter fundet");
         lblNoTickets.getStyleClass().add(Styles.TEXT_SUBTLE);
 
         tblViewTickets.setPlaceholder(lblNoTickets);
@@ -93,7 +170,7 @@ public class TicketController implements Initializable {
         tblColName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         tblColType.setCellValueFactory(cellData ->
                 Bindings.createStringBinding(
-                        () -> cellData.getValue().typeProperty().get().getType(),
+                        () -> cellData.getValue().typeProperty().get().nameProperty().get(),
                         cellData.getValue().typeProperty()
                 )
         );
@@ -187,6 +264,95 @@ public class TicketController implements Initializable {
     private void editTicketItem(TicketItemModel ticketItemModel) {
         MainModel.getInstance().getEditTicketModel().ticketItemModelProperty().set(ticketItemModel);
         ModalHandler.getInstance().getModalOverlay().showFXML(Modal.TICKET_EDIT);
+    }
+
+    private void editTicketTypeItem(TicketTypeItemModel ticketTypeItemModel) {
+        MainModel.getInstance().getTicketInteractor().getEditTicketTypeModel().setTicketType(ticketTypeItemModel);
+        ModalHandler.getInstance().getModalOverlay().showFXML(Modal.TICKET_EDIT_TYPE);
+    }
+
+    private void setTableDataTicketType() {
+        Label lblNoTicketTypes = new Label();
+        lblNoTicketTypes.textProperty().bind(Bindings.when(ticketInteractor.getTicketTypeModel().loadingProperty())
+                .then("Indlæser...")
+                .otherwise("Ingen billet typer fundet"));
+
+        lblNoTicketTypes.getStyleClass().add(Styles.TEXT_SUBTLE);
+        tblViewTicketTypes.setPlaceholder(lblNoTicketTypes);
+
+        tblColTicketTypeName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+
+        TableColumn<TicketTypeItemModel, Void> tblColActions = new TableColumn<>("");
+
+        tblColActions.setCellFactory(col -> {
+            TableCell<TicketTypeItemModel, Void> cell = new TableCell<>() {
+                private final Button btnEdit = new Button(null, new FontIcon(Feather.EDIT));
+                private final Button btnDelete = new Button(null, new FontIcon(Feather.TRASH));
+
+                private final HBox hBox = new HBox(10, btnEdit, btnDelete);
+                {
+                    Tooltip editToolTip = new Tooltip("Rediger");
+                    Tooltip deleteToolTip = new Tooltip("Slet");
+
+                    btnEdit.setTooltip(editToolTip);
+                    btnDelete.setTooltip(deleteToolTip);
+
+                    btnEdit.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Styles.FLAT);
+                    btnDelete.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.DANGER, Styles.FLAT);
+
+                    btnEdit.setOnAction(event -> {
+                        TicketTypeItemModel item = getTableRow().getItem();
+                        if (item != null)
+                            editTicketTypeItem(item);
+                    });
+
+                    btnDelete.setOnAction(event -> {
+                        TicketTypeItemModel item = getTableRow().getItem();
+                        if (item != null) {
+                            ticketInteractor.getTicketsByType(item, ticketList -> {
+                                StringBuilder ticketsToDeleteMessage = new StringBuilder();
+
+                                if (ticketList != null && !ticketList.isEmpty()) {
+                                    ticketsToDeleteMessage.append("Følgende underliggende billetter vil blive slettet:\n");
+                                    for (TicketItemModel ticket : ticketList)
+                                        ticketsToDeleteMessage
+                                                .append("- ")
+                                                .append(ticket.nameProperty().get())
+                                                .append("\n");
+                                } else {
+                                    ticketsToDeleteMessage.append("Ingen underliggende billetter vil blive slettet.\n");
+                                }
+
+                                DialogHandler.showConfirmationDialog(
+                                        "Bekræft slet Billet type",
+                                        "Bekræft slet af " + item.nameProperty().get(),
+                                        "Bemærk, hvis du sletter dette, er billet typen \"" + item.nameProperty().get() +
+                                                "\" væk for altid.\n\n" +
+                                                ticketsToDeleteMessage.toString() +
+                                                "\nEr du sikker på at du vil fortsætte?",
+                                        () -> ticketInteractor.deleteTicketType(item, ticketList));
+                            });
+                        }
+                    });
+
+                    HBox.setHgrow(hBox, Priority.ALWAYS);
+                    hBox.setAlignment(Pos.CENTER_RIGHT);
+                }
+
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                    } else {
+                        setGraphic(hBox);
+                    }
+                }
+            };
+            return cell;
+        });
+
+        tblViewTicketTypes.getColumns().add(tblColActions);
     }
 
     @FXML

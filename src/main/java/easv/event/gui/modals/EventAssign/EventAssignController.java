@@ -46,6 +46,9 @@ public class EventAssignController implements Initializable, IModalController {
     public void initialize(URL location, ResourceBundle resources) {
         eventAssignModel = MainModel.getInstance().getEventAssignModel();
 
+        VBox.setVgrow(comboBoxUsers, javafx.scene.layout.Priority.ALWAYS);
+        comboBoxUsers.setMaxWidth(Double.MAX_VALUE);
+
         vBoxEvent.getChildren().add(comboBoxUsers);
 
         comboBoxUsers.disableProperty().bind(eventAssignModel.loadingFromDatabaseProperty().and(userInteractor.loadingCoordinatorsFromDbProperty()));

@@ -31,8 +31,8 @@ public class LoginController implements Initializable {
     private final AuthInteractor authInteractor = MainModel.getInstance().getAuthInteractor();
     private final AuthModel authModel = authInteractor.getAuthModel();
 
-    private final static int WIDTH = 800;
-    private final static int HEIGHT = 600;
+    private final static int WIDTH = 1200;
+    private final static int HEIGHT = 800;
     private final static String TITLE = "Event System";
 
     private boolean loaded = false;
@@ -51,14 +51,41 @@ public class LoginController implements Initializable {
         validate();
         loginListener();
         txtFieldListener();
+        setupEnterKeyHandler();
+    }
+
+    private void setupEnterKeyHandler() {
+        txtFieldEmail.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                if (!txtFieldPassword.getText().isEmpty()) {
+                    btnContinue.fire();
+                } else {
+                    txtFieldPassword.requestFocus();
+                }
+            }
+        });
+
+        txtFieldPassword.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                if (!btnContinue.isDisabled()) {
+                    btnContinue.fire();
+                }
+            }
+        });
     }
 
     private void validate() {
         BooleanBinding notValidFields = txtFieldEmail.textProperty().isEmpty()
+                .or(authModel.databaseLoadProperty())
                 .or(txtFieldPassword.textProperty().isEmpty())
                 .or(Bindings.createBooleanBinding(() -> !isValidEmail(txtFieldEmail.getText()), txtFieldEmail.textProperty()));
 
         btnContinue.disableProperty().bind(notValidFields);
+        btnContinue.textProperty().bind(
+                Bindings.when(authModel.databaseLoadProperty())
+                        .then("Indlæser...")
+                        .otherwise("Fortsæt")
+        );
     }
 
     private void txtFieldListener() {
@@ -66,7 +93,6 @@ public class LoginController implements Initializable {
             if (newValue) {
                 txtFieldEmail.pseudoClassStateChanged(Styles.STATE_DANGER, true);
                 txtFieldPassword.pseudoClassStateChanged(Styles.STATE_DANGER, true);
-
             }
         });
 
@@ -106,7 +132,7 @@ public class LoginController implements Initializable {
                 return;
             }
 
-           // FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
+            // FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
             Parent root = pageData.getPageParent();
 
             // StackPane bruges grundet ModalPane, så vi kan vise

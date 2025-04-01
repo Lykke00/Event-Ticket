@@ -1,3 +1,4 @@
+
 package easv.event.dal.dao;
 
 import easv.event.be.Event;
@@ -51,7 +52,7 @@ public class EventDAO implements IEventDAO {
 
             return events;
         } catch (Exception e) {
-            throw new Exception("Kunne ikke hente alle Events for bruger. Bruger id: " + userId);
+            throw new Exception("Kunne ikke hente alle Events for bruger. Bruger id: " + userId, e);
         }
     }
 
@@ -143,7 +144,7 @@ public class EventDAO implements IEventDAO {
                 WHERE id = ?
                 """;
         try (Connection conn = dbConnector.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(query)) {
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, event.getTitle());
             stmt.setString(2, event.getDescription());
             stmt.setDate(3, Date.valueOf(event.getDate()));
@@ -244,8 +245,6 @@ public class EventDAO implements IEventDAO {
             }
         }
     }
-
-
 
     @Override
     public boolean assignCoordinators(Event event, List<User> users) throws Exception {
