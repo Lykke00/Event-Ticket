@@ -11,11 +11,13 @@ import easv.event.gui.modals.EventAssign.EventAssignModel;
 import easv.event.gui.pages.Event.EventModel;
 import easv.event.gui.utils.BackgroundTaskExecutor;
 import easv.event.gui.utils.DialogHandler;
+import easv.event.gui.utils.NotificationHandler;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class EventInteractor {
     private final EventModel eventModel;
@@ -74,7 +76,7 @@ public class EventInteractor {
         return this.eventModel;
     }
 
-    public void deleteEvent(EventItemModel eventItemModel) {
+    public void deleteEvent(EventItemModel eventItemModel, Consumer<Boolean> callback) {
         BackgroundTaskExecutor.execute(
                 () -> { // Hvad skal baggrundstråden køre?
                     try {
@@ -88,10 +90,20 @@ public class EventInteractor {
                     if (!wasDeleted)
                         return;
 
-                    eventModel.deleteEvent(eventItemModel);
+                    boolean shouldAdd = !eventItemModel.activeProperty().get();
+                    if (shouldAdd) {
+                        eventItemModel.activeProperty().set(true);
+                        NotificationHandler.getInstance().showNotification( "Eventet " + eventItemModel.nameProperty().get() + " er blevet genaktiveret", NotificationHandler.NotificationType.SUCCESS);
+                    } else {
+                        eventItemModel.activeProperty().set(false);
+                        NotificationHandler.getInstance().showNotification( "Eventet " + eventItemModel.nameProperty().get() + " er blevet slettet", NotificationHandler.NotificationType.SUCCESS);
+                    }
+
+                    callback.accept(wasDeleted);
                 },
                 exception -> { //hvis nu en fejl sker
-                    DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke hente data for bruger", exception);
+                    DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke slette event", exception);
+                    callback.accept(null);
                 }
         );
     }

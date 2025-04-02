@@ -9,6 +9,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 public class EventModel {
@@ -34,7 +35,22 @@ public class EventModel {
     }
 
     public SortedList<EventItemModel> getSortedEventsList() {
-        return new SortedList<>(filteredEvents, (event1, event2) -> Integer.compare(event2.idProperty().get(), event1.idProperty().get()));
+        return new SortedList<>(filteredEvents, (event1, event2) -> {
+            LocalDate date1 = event1.dateProperty().get();
+            LocalDate date2 = event2.dateProperty().get();
+            LocalDate today = LocalDate.now();
+
+            if (date1 == null) return 1;
+            if (date2 == null) return -1;
+
+            boolean isFuture1 = !date1.isBefore(today);
+            boolean isFuture2 = !date2.isBefore(today);
+
+            if (isFuture1 && !isFuture2) return -1;
+            if (!isFuture1 && isFuture2) return 1;
+
+            return date1.compareTo(date2);
+        });
     }
 
     public FilteredList<EventItemModel> getCompletedEventsList() {

@@ -123,7 +123,8 @@ public class EventDAO implements IEventDAO {
 
     @Override
     public boolean deleteEvent(Event event) throws Exception {
-        String sql = "UPDATE events SET active = 0 WHERE id = ?";
+        int setState = event.isActive() ? 0 : 1;
+        String sql = "UPDATE events SET active = " + setState + " WHERE id = ?";
         try (Connection conn = dbConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -132,7 +133,7 @@ public class EventDAO implements IEventDAO {
 
             return true;
         } catch (Exception e) {
-            throw new Exception("Kunne ikke slette Event fra databasen");
+            throw new Exception("Kunne ikke ændre Events status fra databasen");
         }
     }
 

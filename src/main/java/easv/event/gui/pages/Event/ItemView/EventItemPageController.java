@@ -122,7 +122,7 @@ public class EventItemPageController implements Initializable {
                 "Bekræft slet af " + eventItemModel.nameProperty().get(),
                 "Bemærk, hvis du sletter dette, er eventet \"" + eventItemModel.nameProperty().get() + "\" væk for altid. \n\nEr du sikker på at du vil fortsætte?",
                 () -> {
-                        eventInteractor.deleteEvent(eventItemModel);
+                       // eventInteractor.deleteEvent(eventItemModel);
                         PageHandler.getInstance().setCurrentPage(Pages.EVENT);
                     })
                 );

@@ -237,7 +237,6 @@ public class EventController implements Initializable, IPageController {
                     btnView.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Styles.FLAT);
                     btnAssign.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Styles.FLAT);
                     btnEdit.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Styles.FLAT);
-                    btnDelete.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.DANGER, Styles.FLAT);
 
                     btnView.setOnAction(event -> {
                         EventItemModel item = getTableRow().getItem();
@@ -261,13 +260,25 @@ public class EventController implements Initializable, IPageController {
 
                     btnDelete.setOnAction(event -> {
                         EventItemModel item = getTableRow().getItem();
-                        if (item != null)
+                        if (item != null) {
+                            boolean active = item.activeProperty().get();
+                            String eventName = item.nameProperty().get();
+                            String title = active ? "Bekræft slet af Event" : "Bekræft genaktivering af Event";
+                            String headerText = active ? "Bekræft slet af " + eventName : "Bekræft genaktivering af " + eventName;
+                            String message = active ? "Bemærk, hvis du sletter dette, er eventet \"" + item.nameProperty().get() + "\" væk for altid. \n\nEr du sikker på at du vil fortsætte?" : "Bemærk, hvis du genaktiverer dette, vil eventet \"" + item.nameProperty().get() + "\" blive aktiv igen. \n\nEr du sikker på at du vil fortsætte?";
                             DialogHandler.showConfirmationDialog(
-                                    "Bekræft slet Event",
-                                    "Bekræft slet af " + item.nameProperty().get(),
-                                    "Bemærk, hvis du sletter dette, er eventet \"" + item.nameProperty().get() + "\" væk for altid. \n\nEr du sikker på at du vil fortsætte?",
-                                    () -> eventInteractor.deleteEvent(item));
-                    });
+                                            title,
+                                            headerText,
+                                            message,
+                                            () -> {
+                                                eventInteractor.deleteEvent(item, wasDeleted -> {
+                                                    if (wasDeleted) {
+                                                        tblViewEvents.refresh();
+                                                    }
+                                                });
+                                            }
+                            );
+                        }});
 
                     HBox.setHgrow(hBox, Priority.ALWAYS);
                     hBox.setAlignment(Pos.CENTER_RIGHT);
@@ -279,11 +290,31 @@ public class EventController implements Initializable, IPageController {
                 @Override
                 protected void updateItem(Void item, boolean empty) {
                     super.updateItem(item, empty);
-                    if (empty) {
+
+                    if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                         setGraphic(null);
-                    } else {
-                        setGraphic(hBox);
+                        return;
                     }
+
+                    EventItemModel eventItem = getTableRow().getItem();
+
+                    btnDelete.getStyleClass().removeIf(style ->
+                            style.equals(Styles.DANGER) ||
+                                    style.equals(Styles.SUCCESS) ||
+                                    style.equals(Styles.BUTTON_ICON) ||
+                                    style.equals(Styles.FLAT)
+                    );
+
+                    // Update button based on activeProperty
+                    if (!eventItem.activeProperty().get()) {
+                        btnDelete.setGraphic(new FontIcon(Feather.PLUS));
+                        btnDelete.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.SUCCESS, Styles.FLAT);
+                    } else {
+                        btnDelete.setGraphic(new FontIcon(Feather.TRASH));
+                        btnDelete.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.DANGER, Styles.FLAT);
+                    }
+
+                    setGraphic(hBox);
                 }
             };
             return cell;
