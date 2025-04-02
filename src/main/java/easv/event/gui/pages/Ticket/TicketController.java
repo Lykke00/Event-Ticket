@@ -216,11 +216,29 @@ public class TicketController implements Initializable {
                     btnDelete.setOnAction(event -> {
                         TicketItemModel item = getTableRow().getItem();
                         if (item != null)
-                            DialogHandler.showConfirmationDialog(
-                                    "Bekræft slet Billet",
-                                    "Bekræft slet af " + item.nameProperty().get(),
-                                    "Bemærk, hvis du sletter dette, er billetten \"" + item.nameProperty().get() + "\" væk for altid. \n\nEr du sikker på at du vil fortsætte?",
-                                    () -> MainModel.getInstance().getTicketModel().deleteTicket(item));
+                            ticketInteractor.getEventsForTicket(item, eventList -> {
+                                StringBuilder deleteTicketFromEvent = new StringBuilder();
+
+                                if (eventList != null && !eventList.isEmpty()) {
+                                    deleteTicketFromEvent.append("Billetten vil blive fjernet fra følgende events:\n");
+                                    for (EventItemModel eventItemModel : eventList)
+                                        deleteTicketFromEvent
+                                                .append("- ")
+                                                .append(eventItemModel.nameProperty().get())
+                                                .append("\n");
+                                } else {
+                                    deleteTicketFromEvent.append("Billetten vil ikke blive fjernet fra nogle events.\n");
+                                }
+
+                                DialogHandler.showConfirmationDialog(
+                                        "Bekræft slet Billet",
+                                        "Bekræft slet af " + item.nameProperty().get(),
+                                        "Bemærk, hvis du sletter dette, er billetten \"" + item.nameProperty().get() +
+                                                "\" væk for altid.\n\n" +
+                                                deleteTicketFromEvent.toString() +
+                                                "\nEr du sikker på at du vil fortsætte?",
+                                        () -> ticketInteractor.deleteTicket(item));
+                            });
                     });
 
                     HBox.setHgrow(hBox, Priority.ALWAYS);
@@ -262,12 +280,12 @@ public class TicketController implements Initializable {
     }
 
     private void editTicketItem(TicketItemModel ticketItemModel) {
-        MainModel.getInstance().getEditTicketModel().ticketItemModelProperty().set(ticketItemModel);
+        ticketInteractor.getEditTicketModel().ticketItemModelProperty().set(ticketItemModel);
         ModalHandler.getInstance().getModalOverlay().showFXML(Modal.TICKET_EDIT);
     }
 
     private void editTicketTypeItem(TicketTypeItemModel ticketTypeItemModel) {
-        MainModel.getInstance().getTicketInteractor().getEditTicketTypeModel().setTicketType(ticketTypeItemModel);
+        ticketInteractor.getEditTicketTypeModel().setTicketType(ticketTypeItemModel);
         ModalHandler.getInstance().getModalOverlay().showFXML(Modal.TICKET_EDIT_TYPE);
     }
 

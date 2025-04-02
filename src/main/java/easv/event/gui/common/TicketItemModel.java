@@ -47,10 +47,8 @@ public class TicketItemModel {
         return ticketEventItemModels;
     }
 
-    public static boolean updateTicketItemModel(TicketItemModel ticketItemModel, String name, TicketTypeItemModel type) {
-        ticketItemModel.nameProperty().set(name);
-        ticketItemModel.typeProperty().set(type);
-        return true;
+    public static TicketItemModel copy(TicketItemModel ticketItemModel) {
+        return new TicketItemModel(ticketItemModel.idProperty().get(), ticketItemModel.nameProperty().get(), ticketItemModel.typeProperty().get());
     }
 
     public static TicketItemModel fromEntity(Ticket ticket) {
@@ -59,5 +57,10 @@ public class TicketItemModel {
 
     public Ticket toEntity() {
         return new Ticket(idProperty().get(), nameProperty().get(), TicketTypeItemModel.toEntity(typeProperty().get()));
+    }
+
+    public void updateModel(TicketItemModel updatedModel) {
+        this.name.set(updatedModel.name.get());
+        this.type.set(updatedModel.type.get());
     }
 }

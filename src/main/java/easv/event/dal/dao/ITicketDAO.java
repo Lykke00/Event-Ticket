@@ -1,5 +1,6 @@
 package easv.event.dal.dao;
 
+import easv.event.be.Event;
 import easv.event.be.Ticket;
 import easv.event.be.TicketType;
 
@@ -23,4 +24,10 @@ public interface ITicketDAO {
     List<Ticket> getTicketsForType(TicketType type) throws Exception;
 
     boolean editTicketType(TicketType ticketType) throws Exception;
+
+    boolean editTicket(Ticket ticket) throws Exception;
+
+    List<Event> getEventsByTicket(Ticket ticket) throws Exception;
+
+    boolean deleteTicket(Ticket ticket) throws Exception;
 }

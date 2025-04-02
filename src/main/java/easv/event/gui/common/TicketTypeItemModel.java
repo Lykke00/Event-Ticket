@@ -41,4 +41,9 @@ public class TicketTypeItemModel {
         this.id.set(updatedModel.id.get());
         this.name.set(updatedModel.name.get());
     }
+
+    @Override
+    public String toString() {
+        return this.nameProperty().get();
+    }
 }

@@ -72,7 +72,6 @@ public class NewTicketTypeController implements Initializable {
                 TicketTypeItemModel ticketTypeItemModel = new TicketTypeItemModel(name);
                 ticketInteractor.createTicketType(ticketTypeItemModel);
                 modalHandler.hideModal();
-
             }
         });
     }

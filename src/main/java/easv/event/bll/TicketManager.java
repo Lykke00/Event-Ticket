@@ -1,5 +1,6 @@
 package easv.event.bll;
 
+import easv.event.be.Event;
 import easv.event.be.Ticket;
 import easv.event.be.TicketType;
 import easv.event.dal.dao.ITicketDAO;
@@ -53,5 +54,17 @@ public class TicketManager {
 
     public boolean editTicketType(TicketType ticketType) throws Exception {
         return ticketDAO.editTicketType(ticketType);
+    }
+
+    public boolean editTicket(Ticket ticket) throws Exception {
+        return ticketDAO.editTicket(ticket);
+    }
+
+    public List<Event> getEventsByTicket(Ticket ticket) throws Exception {
+        return ticketDAO.getEventsByTicket(ticket);
+    }
+
+    public boolean deleteTicket(Ticket ticket) throws Exception {
+        return ticketDAO.deleteTicket(ticket);
     }
 }

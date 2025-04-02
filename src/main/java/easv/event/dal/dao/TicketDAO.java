@@ -1,12 +1,14 @@
 
 package easv.event.dal.dao;
 
+import easv.event.be.Event;
 import easv.event.be.Ticket;
 import easv.event.be.TicketType;
 import easv.event.dal.DBConnector;
 
 import java.io.IOException;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -262,5 +264,101 @@ public class TicketDAO implements ITicketDAO {
             throw new Exception("Kunne ikke ændre bilet typen i databasen");
         }
 
+    }
+
+    @Override
+    public boolean editTicket(Ticket ticket) throws Exception {
+        String sql = "UPDATE tickets SET name = ?, type = ? WHERE id = ?";
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, ticket.getName());
+            stmt.setInt(2, ticket.getTicketType().getId());
+            stmt.setInt(3, ticket.getId());
+
+            stmt.executeUpdate();
+
+            return true;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke redigere biletten i databasen");
+        }
+    }
+
+    @Override
+    public List<Event> getEventsByTicket(Ticket ticket) throws Exception {
+        List<Event> events = new ArrayList<>();
+
+        String query = """
+                 SELECT events.* FROM ticket_events
+                 JOIN events ON ticket_events.event_id = events.id
+                 WHERE ticket_events.ticket_id = ? AND events.active = 1
+                """;
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, ticket.getId());
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String title = rs.getString("title");
+                String description = rs.getString("description");
+                LocalDate date = rs.getDate("date").toLocalDate();
+                String startsAt = rs.getString("starts_at");
+                String location = rs.getString("location");
+                boolean active = rs.getBoolean("active");
+
+                Event event = new Event(id, title, description, date, startsAt, location, active);
+                events.add(event);
+            }
+
+            return events;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke hente alle events for billet i databasen", e);
+        }
+    }
+
+    @Override
+    public boolean deleteTicket(Ticket ticket) throws Exception {
+        Connection conn = null;
+        try {
+            conn = dbConnector.getConnection();
+            conn.setAutoCommit(false);
+
+            String deleteTicketsSQL = "DELETE FROM ticket_events WHERE ticket_id = ?";
+            try (PreparedStatement ticketStmt = conn.prepareStatement(deleteTicketsSQL)) {
+                ticketStmt.setInt(1, ticket.getId());
+                ticketStmt.executeUpdate();
+            }
+
+            String deleteTicketTypeSQL = "DELETE FROM tickets WHERE id = ?";
+            try (PreparedStatement typeStmt = conn.prepareStatement(deleteTicketTypeSQL)) {
+                typeStmt.setInt(1, ticket.getId());
+                typeStmt.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    throw new Exception("Kunne ikke rulle transaktionen tilbage", rollbackEx);
+                }
+            }
+            throw new Exception("Kunne ikke slette billetten fra databasen", e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    throw new Exception("Kunne ikke lukke databaseforbindelsen", closeEx);
+                }
+            }
+        }
     }
 }

@@ -8,6 +8,7 @@ import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.TicketItemModel;
 import easv.event.gui.common.TicketTypeItemModel;
 import easv.event.gui.common.TicketTypeModel;
+import easv.event.gui.modals.EditTicket.EditTicketModel;
 import easv.event.gui.modals.EditTicketType.EditTicketTypeModel;
 import easv.event.gui.modals.NewTicketType.NewTicketTypeModel;
 import easv.event.gui.pages.Ticket.TicketModel;
@@ -23,14 +24,17 @@ public class TicketInteractor {
 
     private final TicketModel ticketModel;
     private final TicketTypeModel ticketTypeModel;
+
     private final NewTicketTypeModel newTicketTypeModel;
     private final EditTicketTypeModel editTicketTypeModel;
+    private final EditTicketModel editTicketModel;
 
     public TicketInteractor() {
         this.ticketModel = new TicketModel();
         this.ticketTypeModel = new TicketTypeModel();
         this.newTicketTypeModel = new NewTicketTypeModel();
         this.editTicketTypeModel = new EditTicketTypeModel();
+        this.editTicketModel = new EditTicketModel();
 
         try {
             this.ticketManager = new TicketManager();
@@ -218,25 +222,90 @@ public class TicketInteractor {
         );
     }
 
-    public void editTicketType(TicketTypeItemModel original, TicketTypeItemModel updatedModel) {
+    public void editTicketType(TicketTypeItemModel original, TicketTypeItemModel updatedModel, Consumer<Boolean> callback) {
         String errorMsg = "En fejl skete ved at prøve at redigere billet typen";
+
         BackgroundTaskExecutor.execute(
                 () -> {
                     try {
                         TicketType ticketType = TicketTypeItemModel.toEntity(updatedModel);
                         return ticketManager.editTicketType(ticketType);
                     } catch (Exception e) {
-                        throw new RuntimeException(errorMsg);
+                        throw new RuntimeException("Database fejl ved forsøg på at tjekke billet type", e);
                     }
                 },
-                updated -> {
-                    if (updated) {
-                        NotificationHandler.getInstance().showNotification( "Billet typen " + original.nameProperty().get() + " er blevet redigeret", NotificationHandler.NotificationType.SUCCESS);
-                        original.updateModel(updatedModel);
-                    }
+                exists -> {
+                    callback.accept(exists);
                 },
                 exception -> {
                     DialogHandler.showExceptionError("Database fejl", errorMsg, exception);
+                    callback.accept(false);
+                }
+        );
+    }
+
+    public void editTicket(TicketItemModel updatedModel, Consumer<Boolean> callback) {
+        String errorMsg = "En fejl skete ved at prøve at redigere billetten";
+
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        Ticket ticket = updatedModel.toEntity();
+                        return ticketManager.editTicket(ticket);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Database fejl ved forsøg på at tjekke billetten", e);
+                    }
+                },
+                exists -> {
+                    callback.accept(exists);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", errorMsg, exception);
+                    callback.accept(false);
+                }
+        );
+    }
+
+    public void getEventsForTicket(TicketItemModel item, Consumer<List<EventItemModel>> callback) {
+        String err = "Database fejl ved forsøg på at få fat i events fra billet";
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        return ticketManager.getEventsByTicket(item.toEntity());
+                    } catch (Exception e) {
+                        throw new RuntimeException(err, e);
+                    }
+                },
+                exists -> {
+                    List<EventItemModel> eventItemModels = exists.stream()
+                            .map(EventItemModel::fromEntity)
+                            .toList();
+
+                    callback.accept(eventItemModels);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", err, exception);
+                    callback.accept(null);
+                }
+        );
+    }
+
+
+    public void deleteTicket(TicketItemModel ticket) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        return ticketManager.deleteTicket(ticket.toEntity());
+                    } catch (Exception e) {
+                        throw new RuntimeException("Database fejl ved forsøg på slet af billetten", e);
+                    }
+                },
+                didDelete -> {
+                    ticketModel.ticketItemModelsListProperty().remove(ticket);
+                    NotificationHandler.getInstance().showNotification( "Billetten " + ticket.nameProperty().get() + " er blevet slettet", NotificationHandler.NotificationType.SUCCESS);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", "Kunne ikke slette billetten", exception);
                 }
         );
     }
@@ -256,4 +325,9 @@ public class TicketInteractor {
     public EditTicketTypeModel getEditTicketTypeModel() {
         return editTicketTypeModel;
     }
+
+    public EditTicketModel getEditTicketModel() {
+        return editTicketModel;
+    }
+
 }

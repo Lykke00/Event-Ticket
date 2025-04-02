@@ -3,9 +3,14 @@ package easv.event.gui.modals.EditTicket;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.TicketItemModel;
 import easv.event.gui.common.TicketTypeItemModel;
+import easv.event.gui.interactors.TicketInteractor;
+import easv.event.gui.modals.IModalController;
 import easv.event.gui.utils.ModalHandler;
+import easv.event.gui.utils.NotificationHandler;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.Property;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -13,13 +18,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 
-public class EditTicketController implements Initializable {
-    private final EditTicketModel editTicketModel = MainModel.getInstance().getEditTicketModel();
+public class EditTicketController implements Initializable, IModalController {
+    private final TicketInteractor ticketInteractor = MainModel.getInstance().getTicketInteractor();
+    private final EditTicketModel editTicketModel = ticketInteractor.getEditTicketModel();
     private final static ModalHandler modalHandler = ModalHandler.getInstance();
 
     @FXML
@@ -40,6 +47,11 @@ public class EditTicketController implements Initializable {
 
         setupBinding();
         validate();
+    }
+
+    @Override
+    public void load() {
+        ticketInteractor.loadAllTicketTypes();
     }
 
     private <T> void bindProperty(EditTicketModel editModel, Property<T> uiProperty, Function<TicketItemModel, Property<T>> modelPropertyGetter) {
@@ -87,11 +99,29 @@ public class EditTicketController implements Initializable {
     }
 
     private void setupChoiceBox() {
-        //icketType[] values = TicketType.values();
-        // for (TicketType value : values)
-        //    choiceBoxType.getItems().add(value);
+        ObservableList<TicketTypeItemModel> values = ticketInteractor.getTicketTypeModel().sortedTicketTypeList();
 
-        choiceBoxType.getSelectionModel().selectFirst();
+        choiceBoxType.setItems(values);
+        choiceBoxType.setConverter(new StringConverter<TicketTypeItemModel>() {
+            @Override
+            public String toString(TicketTypeItemModel item) {
+                return (item != null) ? item.nameProperty().get() : "";
+            }
+
+            @Override
+            public TicketTypeItemModel fromString(String string) {
+                return null;
+            }
+        });
+
+        values.addListener((ListChangeListener<TicketTypeItemModel>) change -> {
+            if (!values.isEmpty() && choiceBoxType.getSelectionModel().isEmpty()) {
+                choiceBoxType.getSelectionModel().select(editTicketModel.ticketItemModelProperty().get().typeProperty().get());
+            }
+        });
+
+        if (!values.isEmpty())
+            choiceBoxType.getSelectionModel().select(editTicketModel.ticketItemModelProperty().get().typeProperty().get());
     }
 
     private void validate() {
@@ -111,11 +141,21 @@ public class EditTicketController implements Initializable {
 
     @FXML
     private void btnActionCreateTicket(ActionEvent actionEvent) {
-        TicketItemModel.updateTicketItemModel(
-                editTicketModel.ticketItemModelProperty().get(),
-                txtFieldName.getText(),
-                choiceBoxType.getValue()
-        );
-        modalHandler.hideModal();
+        String newName = txtFieldName.getText();
+        TicketTypeItemModel newType = choiceBoxType.getValue();
+
+        TicketItemModel original = editTicketModel.ticketItemModelProperty().get();
+        TicketItemModel copy = TicketItemModel.copy(original);
+
+        copy.nameProperty().set(newName);
+        copy.typeProperty().set(newType);
+
+        ticketInteractor.editTicket(copy, succes -> {
+            if (succes) {
+                NotificationHandler.getInstance().showNotification( "Billetten " + original.nameProperty().get() + " er blevet redigeret", NotificationHandler.NotificationType.SUCCESS);
+                original.updateModel(copy);
+                ModalHandler.getInstance().hideModal();
+            }
+        });
     }
 }
