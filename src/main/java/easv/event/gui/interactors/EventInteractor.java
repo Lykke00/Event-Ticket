@@ -76,18 +76,18 @@ public class EventInteractor {
         return this.eventModel;
     }
 
-    public void deleteEvent(EventItemModel eventItemModel, Consumer<Boolean> callback) {
+    public void changeEventStatus(EventItemModel eventItemModel, Consumer<Boolean> callback) {
         BackgroundTaskExecutor.execute(
                 () -> { // Hvad skal baggrundstråden køre?
                     try {
                         Event event = EventItemModel.toEntity(eventItemModel);
-                        return eventManager.deleteEvent(event);
+                        return eventManager.changeStatus(event);
                     } catch (Exception e) {
-                        throw new RuntimeException("En fejl skete ved at prøve at slette Event fra databasen", e);
+                        throw new RuntimeException("En fejl skete ved at prøve at ændre Event Status i databasen", e);
                     }
                 }, // --------------------------------------------------------
-                wasDeleted -> { // hvad outputter den tilbage og hvad skal der så ske?
-                    if (!wasDeleted)
+                wasChanged -> { // hvad outputter den tilbage og hvad skal der så ske?
+                    if (!wasChanged)
                         return;
 
                     boolean shouldAdd = !eventItemModel.activeProperty().get();
@@ -99,10 +99,10 @@ public class EventInteractor {
                         NotificationHandler.getInstance().showNotification( "Eventet " + eventItemModel.nameProperty().get() + " er blevet slettet", NotificationHandler.NotificationType.SUCCESS);
                     }
 
-                    callback.accept(wasDeleted);
+                    callback.accept(wasChanged);
                 },
                 exception -> { //hvis nu en fejl sker
-                    DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke slette event", exception);
+                    DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke ændre event status", exception);
                     callback.accept(null);
                 }
         );

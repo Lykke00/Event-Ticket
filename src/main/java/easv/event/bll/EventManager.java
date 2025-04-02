@@ -46,8 +46,8 @@ public class EventManager {
         return createdEvent;
     }
 
-    public boolean deleteEvent(Event event) throws Exception {
-        return eventDAO.deleteEvent(event);
+    public boolean changeStatus(Event event) throws Exception {
+        return eventDAO.changeEventStatus(event);
     }
 
     public boolean editEvent(Event event) throws Exception {

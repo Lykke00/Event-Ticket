@@ -271,8 +271,8 @@ public class EventController implements Initializable, IPageController {
                                             headerText,
                                             message,
                                             () -> {
-                                                eventInteractor.deleteEvent(item, wasDeleted -> {
-                                                    if (wasDeleted) {
+                                                eventInteractor.changeEventStatus(item, wasChanged -> {
+                                                    if (wasChanged) {
                                                         tblViewEvents.refresh();
                                                     }
                                                 });

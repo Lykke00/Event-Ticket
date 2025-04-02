@@ -122,7 +122,7 @@ public class EventDAO implements IEventDAO {
     }
 
     @Override
-    public boolean deleteEvent(Event event) throws Exception {
+    public boolean changeEventStatus(Event event) throws Exception {
         int setState = event.isActive() ? 0 : 1;
         String sql = "UPDATE events SET active = " + setState + " WHERE id = ?";
         try (Connection conn = dbConnector.getConnection();
