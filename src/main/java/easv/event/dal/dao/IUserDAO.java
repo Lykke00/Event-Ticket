@@ -11,5 +11,6 @@ public interface IUserDAO {
 
     List<User> getAllCoordinators() throws Exception;
     List<User> getAll() throws Exception;
+    boolean deleteCoordinator(User coordinator) throws Exception;
 
 }

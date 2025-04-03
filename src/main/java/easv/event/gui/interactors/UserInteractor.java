@@ -7,6 +7,7 @@ import easv.event.gui.common.UserModel;
 import easv.event.gui.pages.Users.UsersModel;
 import easv.event.gui.utils.BackgroundTaskExecutor;
 import easv.event.gui.utils.DialogHandler;
+import easv.event.gui.utils.NotificationHandler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -91,4 +92,27 @@ public class UserInteractor {
     public UsersModel getUsersModel() {
         return usersModel;
     }
+
+    public void deleteCoordinator(UserModel coordinatorModel) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        return userManager.deleteCoordinator(UserModel.toEntity(coordinatorModel));
+                    } catch (Exception e) {
+                        throw new RuntimeException("Database fejl ved forsøg på slet af koordinator", e);
+                    }
+                },
+                didDelete -> {
+                    usersModel.coordinatorListModelObservableList().remove(coordinatorModel);
+                    NotificationHandler.getInstance().showNotification(
+                            "Koordinator " + coordinatorModel.firstNameProperty().get() + " " +
+                                    coordinatorModel.lastNameProperty().get() + " er blevet slettet",
+                            NotificationHandler.NotificationType.SUCCESS);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", "Kunne ikke slette koordinator", exception);
+                }
+        );
+    }
+
 }

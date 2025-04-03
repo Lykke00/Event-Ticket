@@ -4,6 +4,7 @@ import easv.event.be.User;
 import easv.event.dal.dao.IUserDAO;
 import easv.event.dal.dao.UserDAO;
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import easv.event.enums.UserRole;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,6 +63,15 @@ public class UserManager {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean deleteCoordinator(User coordinator) throws Exception {
+        // Tjekker om brugeren faktisk er en koordinator
+        if (coordinator.getRole() != UserRole.COORDINATOR) {
+            throw new Exception("Brugeren er ikke en koordinator");
+        }
+        // Kalder DAL-laget for at slette koordinatoren
+        return userDAO.deleteCoordinator(coordinator);
     }
 }
 

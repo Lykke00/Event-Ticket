@@ -193,4 +193,17 @@ public class UserDAO implements IUserDAO {
             }
         }
     }
+    @Override
+    public boolean deleteCoordinator(User coordinator) throws Exception {
+        String query = "DELETE FROM Users WHERE id = ? AND role = 'COORDINATOR'";
+
+        Connection conn = dbConnector.getConnection();
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, coordinator.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
 }
+

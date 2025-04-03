@@ -135,12 +135,23 @@ public class UsersController implements Initializable, IPageController {
 
                     btnDelete.setOnAction(event -> {
                         UserModel item = getTableRow().getItem();
-                        if (item != null)
-                            DialogHandler.showConfirmationDialog(
-                                    "Slet bruger",
-                                    "Bekræft slettelse af konti " + item.firstNameProperty().get() + " " + item.lastNameProperty().get(),
-                                    "Bemærk, hvis du fjerner denne konti, vil alle data fra brugeren blive slettet.\n\nEr du sikker på at du vil fortsætte?",
-                                    () -> MainModel.getInstance().getUsersModel().deleteUser(item));
+                        if (item != null) {
+                            if (item.roleProperty().get() == UserRole.COORDINATOR) {
+                                // For koordinatorer
+                                DialogHandler.showConfirmationDialog(
+                                        "Slet koordinator",
+                                        "Bekræft slettelse af koordinator " + item.firstNameProperty().get() + " " + item.lastNameProperty().get(),
+                                        "Bemærk, hvis du fjerner denne koordinator, vil alle data fra koordinatoren blive slettet.\n\nEr du sikker på at du vil fortsætte?",
+                                        () -> MainModel.getInstance().getUsersModel().deleteCoordinator(item));
+                            } else {
+                                // For almindelige brugere
+                                DialogHandler.showConfirmationDialog(
+                                        "Slet bruger",
+                                        "Bekræft slettelse af konti " + item.firstNameProperty().get() + " " + item.lastNameProperty().get(),
+                                        "Bemærk, hvis du fjerner denne konti, vil alle data fra brugeren blive slettet.\n\nEr du sikker på at du vil fortsætte?",
+                                        () -> MainModel.getInstance().getUsersModel().deleteUser(item));
+                            }
+                        }
                     });
 
                     HBox.setHgrow(hBox, Priority.ALWAYS);
