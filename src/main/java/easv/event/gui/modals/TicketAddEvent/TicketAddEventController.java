@@ -5,7 +5,10 @@ import easv.event.gui.MainModel;
 import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.TicketEventItemModel;
 import easv.event.gui.common.TicketItemModel;
+import easv.event.gui.common.UserModel;
 import easv.event.gui.interactors.EventInteractor;
+import easv.event.gui.interactors.TicketInteractor;
+import easv.event.gui.modals.IModalController;
 import easv.event.gui.pages.Event.EventModel;
 import easv.event.gui.pages.Ticket.ItemView.TicketItemViewModel;
 import easv.event.gui.utils.ModalHandler;
@@ -23,10 +26,14 @@ import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
-public class TicketAddEventController implements Initializable {
+public class TicketAddEventController implements Initializable, IModalController {
     private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
+    private final TicketInteractor ticketInteractor = MainModel.getInstance().getTicketInteractor();
     private final EventModel eventModel = eventInteractor.getEventModel();
 
     private TicketItemViewModel ticketItemModel;
@@ -45,24 +52,49 @@ public class TicketAddEventController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        ticketItemModel = MainModel.getInstance().getTicketItemViewModel();
-        comboBoxEvent.getItems().addAll(eventModel.eventsListProperty());
+        //comboBoxEvent.getItems().addAll(eventModel.eventsListProperty());
 
         comboBoxEvent.setPrefWidth(Control.USE_COMPUTED_SIZE);
         comboBoxEvent.setMaxWidth(Double.MAX_VALUE);
 
-        updateEventComboBox(ticketItemModel.ticketItemModelProperty().get());
+        updateEventComboBox(ticketInteractor.getTicketItemViewModel().ticketItemModel());
 
         vBoxEvent.getChildren().add(comboBoxEvent);
-
-        ticketItemModel.ticketItemModelProperty().addListener((observable, oldItem, newItem) -> {
-            updateEventComboBox(newItem);
-        });
 
         txtFieldPriceOnlyNumbers();
         validate();
 
         maskTxtFieldPrice.setLeft(new FontIcon(Feather.DOLLAR_SIGN));
+    }
+
+    @Override
+    public void load() {
+        ticketItemModel = ticketInteractor.getTicketItemViewModel();
+        ticketInteractor.getEventTicketsByEvent(ticketItemModel.ticketItemModel());
+
+        ticketItemModel.databaseLoadingProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                updateEventComboBox(ticketItemModel.ticketItemModel());
+            }
+        });
+    }
+
+    private void updateEventComboBox(TicketItemModel ticketItemModel) {
+        ObservableList<EventItemModel> allEventModels = eventInteractor.getEventModel().eventsListProperty();
+        ObservableList<TicketEventItemModel> ticketEvents = ticketItemModel != null ? ticketItemModel.getTicketEventItemModels() : FXCollections.observableArrayList();
+
+        comboBoxEvent.getCheckModel().clearChecks();
+        comboBoxEvent.getItems().setAll(allEventModels);
+
+        for (TicketEventItemModel ticket : ticketEvents) {
+            EventItemModel event = allEventModels.stream()
+                    .filter(e -> e.idProperty().get() == ticket.eventProperty().get().idProperty().get())
+                    .findFirst()
+                    .orElse(null);
+            if (event != null) {
+                comboBoxEvent.getCheckModel().check(event);
+            }
+        }
     }
 
     private void txtFieldPriceOnlyNumbers() {
@@ -80,35 +112,6 @@ public class TicketAddEventController implements Initializable {
         btnAddEvent.disableProperty().bind(isPriceEmpty.or(isPriceInvalid));
     }
 
-    private void updateEventComboBox(TicketItemModel ticketItemModel) {
-        ObservableList<EventItemModel> allEvents = eventModel.eventsListProperty();
-        ObservableList<TicketEventItemModel> ticketEvents = ticketItemModel != null ? ticketItemModel.getTicketEventItemModels() : FXCollections.observableArrayList();
-
-        comboBoxEvent.getItems().clear();
-
-        ObservableList<EventItemModel> selectedEvents = FXCollections.observableArrayList();
-
-        ticketEvents.forEach(ticketEvent -> {
-            EventItemModel event = allEvents.stream()
-                    .filter(e -> e.idProperty().get() == ticketEvent.eventIdProperty().get())
-                    .findFirst()
-                    .orElse(null);
-            if (event != null) {
-                selectedEvents.add(event);
-            }
-        });
-
-        ObservableList<EventItemModel> filteredEvents = FXCollections.observableArrayList(
-                allEvents.stream()
-                        .filter(event -> ticketEvents.stream().noneMatch(ticketEvent -> ticketEvent.eventIdProperty().get() == event.idProperty().get()))
-                        .toList()
-        );
-
-        comboBoxEvent.getItems().setAll(FXCollections.observableArrayList(selectedEvents));
-        comboBoxEvent.getItems().addAll(filteredEvents);
-
-        selectedEvents.forEach(comboBoxEvent.getCheckModel()::check);
-    }
 
     @FXML
     private void btnCancelAddEvent(ActionEvent actionEvent) {
@@ -117,25 +120,35 @@ public class TicketAddEventController implements Initializable {
 
     @FXML
     private void btnActionAddEvent(ActionEvent actionEvent) {
-        ObservableList<TicketEventItemModel> ticketEvents = ticketItemModel.ticketItemModelProperty().get().getTicketEventItemModels();
-
+        ObservableList<TicketEventItemModel> ticketEvents = ticketItemModel.ticketItemModel().getTicketEventItemModels();
         ObservableList<EventItemModel> selectedEvents = comboBoxEvent.getCheckModel().getCheckedItems();
-        ObservableList<TicketEventItemModel> addedEvents = FXCollections.observableArrayList();
+        ObservableList<EventItemModel> allEvents = comboBoxEvent.getItems();
 
-        // hvis den allerede er tilføjet, så ikke tilføj den igen
+        ObservableList<EventItemModel> addedEvents = FXCollections.observableArrayList();
+        ObservableList<EventItemModel> removedEvents = FXCollections.observableArrayList();
+
         selectedEvents.forEach(event -> {
             boolean exists = ticketEvents.stream()
-                    .anyMatch(ticketEvent -> ticketEvent.eventIdProperty().get() == event.idProperty().get());
+                    .anyMatch(ticketEvent -> ticketEvent.eventProperty().get().idProperty().get() == event.idProperty().get());
 
-            if (!exists)
-                addedEvents.add(new TicketEventItemModel(event.idProperty().get(), event.nameProperty().get(), Integer.parseInt(maskTxtFieldPrice.getText())));
+            if (!exists) {
+                addedEvents.add(event);
+            }
         });
 
-        ticketEvents.addAll(addedEvents);
+        allEvents.forEach(event -> {
+            boolean stillSelected = selectedEvents.contains(event);
 
-        ticketEvents.removeIf(ticketEvent ->
-                selectedEvents.stream().noneMatch(event -> event.idProperty().get() == ticketEvent.eventIdProperty().get())
-        );
+            boolean wasPreviouslyAdded = ticketEvents.stream()
+                    .anyMatch(ticketEvent -> ticketEvent.eventProperty().get().idProperty().get() == event.idProperty().get());
+
+            if (wasPreviouslyAdded && !stillSelected) {
+                removedEvents.add(event);
+            }
+        });
+
+        double price = Double.parseDouble(maskTxtFieldPrice.getText());
+        ticketInteractor.addTicketToEvent(ticketItemModel.ticketItemModel(), price, addedEvents, removedEvents);
 
         ModalHandler.getInstance().hideModal();
     }

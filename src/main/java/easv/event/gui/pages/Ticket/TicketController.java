@@ -275,7 +275,7 @@ public class TicketController implements Initializable {
     }
 
     private void goToTicketPage(TicketItemModel ticketItemModel) {
-        MainModel.getInstance().getTicketItemViewModel().ticketItemModelProperty().set(ticketItemModel);
+        ticketInteractor.getTicketItemViewModel().setTicketItemModel(ticketItemModel);
         PageHandler.getInstance().setCurrentPage(Pages.TICKET_ITEM_PAGE);
     }
 

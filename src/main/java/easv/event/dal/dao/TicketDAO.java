@@ -3,6 +3,7 @@ package easv.event.dal.dao;
 
 import easv.event.be.Event;
 import easv.event.be.Ticket;
+import easv.event.be.TicketEvent;
 import easv.event.be.TicketType;
 import easv.event.dal.DBConnector;
 
@@ -263,7 +264,6 @@ public class TicketDAO implements ITicketDAO {
         } catch (Exception e) {
             throw new Exception("Kunne ikke ændre bilet typen i databasen");
         }
-
     }
 
     @Override
@@ -359,6 +359,111 @@ public class TicketDAO implements ITicketDAO {
                     throw new Exception("Kunne ikke lukke databaseforbindelsen", closeEx);
                 }
             }
+        }
+    }
+
+    @Override
+    public List<TicketEvent> addTicketToEvent(TicketEvent ticket, List<Event> eventsToAdd, List<Event> eventsToRemove) throws Exception {
+        List<TicketEvent> updatedTickets = new ArrayList<>();
+        Connection conn = null;
+
+        try {
+            conn = dbConnector.getConnection();
+            conn.setAutoCommit(false);
+
+            String deleteSql = "DELETE FROM ticket_events WHERE ticket_id = ? AND event_id = ?";
+            String insertSql = "INSERT INTO ticket_events (ticket_id, event_id, price) OUTPUT INSERTED.id VALUES (?, ?, ?)";
+
+            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteSql);
+                 PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+
+                if (!eventsToRemove.isEmpty()) {
+                    for (Event event : eventsToRemove) {
+                        deleteStmt.setInt(1, ticket.getTicket().getId());
+                        deleteStmt.setInt(2, event.getId());
+                        deleteStmt.addBatch();
+                    }
+
+                    deleteStmt.executeBatch();
+                }
+
+                if (!eventsToAdd.isEmpty()) {
+                    for (Event event : eventsToAdd) {
+                        insertStmt.setInt(1, ticket.getTicket().getId());
+                        insertStmt.setInt(2, event.getId());
+                        insertStmt.setDouble(3, ticket.getPrice());
+
+                        try (ResultSet rs = insertStmt.executeQuery()) {
+                            if (rs.next()) {
+                                int id = rs.getInt(1);
+                                TicketEvent newTicket = new TicketEvent(id, ticket, event);
+                                updatedTickets.add(newTicket);
+                            }
+                        }
+                    }
+                }
+
+                conn.commit();
+                return updatedTickets;
+
+            } catch (SQLException e) {
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException rollbackEx) {
+                        throw new Exception("Kunne ikke rulle transaktionen tilbage", rollbackEx);
+                    }
+                }
+                throw new Exception("Kunne ikke indsætte eller slette billetter i databasen", e);
+            }
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    throw new Exception("Kunne ikke lukke databaseforbindelsen", closeEx);
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<TicketEvent> getTicketEventByTicket(Ticket ticket) throws Exception {
+        List<TicketEvent> tickets = new ArrayList<>();
+
+        String query = """
+                SELECT events.*, ticket_events.id AS ticket_id, ticket_events.price AS ticket_price FROM ticket_events
+                JOIN events ON ticket_events.event_id = events.id
+                WHERE ticket_events.ticket_id = ?
+                """;
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, ticket.getId());
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String title = rs.getString("title");
+                String description = rs.getString("description");
+                LocalDate date = rs.getDate("date").toLocalDate();
+                String startsAt = rs.getString("starts_at");
+                String location = rs.getString("location");
+                boolean active = rs.getBoolean("active");
+
+                int ticketId = rs.getInt("ticket_id");
+                double ticketPrice = rs.getDouble("ticket_price");
+
+                Event event = new Event(id, title, description, date, startsAt, location, active);
+                TicketEvent ticketEvent = new TicketEvent(ticketId, event, ticketPrice);
+                tickets.add(ticketEvent);
+            }
+
+            return tickets;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke hente alle events for billet i databasen", e);
         }
     }
 }

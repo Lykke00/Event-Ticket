@@ -2,6 +2,7 @@ package easv.event.bll;
 
 import easv.event.be.Event;
 import easv.event.be.Ticket;
+import easv.event.be.TicketEvent;
 import easv.event.be.TicketType;
 import easv.event.dal.dao.ITicketDAO;
 import easv.event.dal.dao.TicketDAO;
@@ -66,5 +67,13 @@ public class TicketManager {
 
     public boolean deleteTicket(Ticket ticket) throws Exception {
         return ticketDAO.deleteTicket(ticket);
+    }
+
+    public List<TicketEvent> addTicketToEvent(TicketEvent ticket, List<Event> eventsToAdd, List<Event> eventsToRemove) throws Exception {
+        return ticketDAO.addTicketToEvent(ticket, eventsToAdd, eventsToRemove);
+    }
+
+    public List<TicketEvent> getEventTicketsByTicket(Ticket ticket) throws Exception {
+        return ticketDAO.getTicketEventByTicket(ticket);
     }
 }

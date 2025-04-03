@@ -8,7 +8,9 @@ import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.TicketEventItemModel;
 import easv.event.gui.common.TicketItemModel;
 import easv.event.gui.interactors.EventInteractor;
+import easv.event.gui.interactors.TicketInteractor;
 import easv.event.gui.modals.Modal;
+import easv.event.gui.pages.IPageController;
 import easv.event.gui.pages.Pages;
 import easv.event.gui.utils.DialogHandler;
 import easv.event.gui.utils.ModalHandler;
@@ -16,6 +18,9 @@ import easv.event.gui.utils.PageHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -30,9 +35,11 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
-public class TicketItemViewController implements Initializable {
+public class TicketItemViewController implements Initializable, IPageController {
     private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
+    private final TicketInteractor ticketInteractor = MainModel.getInstance().getTicketInteractor();
 
     @FXML
     private Card cardTicketInfo;
@@ -51,16 +58,21 @@ public class TicketItemViewController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        ObjectProperty<TicketItemModel> ticketItemModel = MainModel.getInstance().getTicketItemViewModel().ticketItemModelProperty();
+        this.load();
 
-        MainModel.getInstance().getTicketItemViewModel().ticketItemModelProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                bindUI(newValue);
+        addTableViewActions();
+    }
+
+    @Override
+    public void load() {
+        TicketItemModel ticketItemModel = ticketInteractor.getTicketItemViewModel().ticketItemModel();
+        ticketInteractor.getEventTicketsByEvent(ticketItemModel);
+
+        ticketInteractor.getTicketItemViewModel().databaseLoadingProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                bindUI(ticketInteractor.getTicketItemViewModel().ticketItemModel());
             }
         });
-
-        bindUI(ticketItemModel.get());
-        addTableViewActions();
     }
 
     private void bindUI(TicketItemModel ticketItemModel) {
@@ -95,15 +107,33 @@ public class TicketItemViewController implements Initializable {
 
         btnEdit.setOnAction(event -> editTicketItem(ticketItemModel));
         btnAddEvent.setOnAction(event -> ModalHandler.getInstance().getModalOverlay().showFXML(Modal.TICKET_ADD_EVENT));
-        btnDelete.setOnAction(event -> DialogHandler.showConfirmationDialog(
-                "Bekræft slet billet",
-                "Bekræft slet af " + ticketItemModel.nameProperty().get(),
-                "Bemærk, hvis du sletter dette, er billetten \"" + ticketItemModel.nameProperty().get() + "\" væk for altid. \n\nEr du sikker på at du vil fortsætte?",
-                () -> {
-                    MainModel.getInstance().getTicketModel().deleteTicket(ticketItemModel);
-                    PageHandler.getInstance().setCurrentPage(Pages.TICKETS);
-                })
-        );
+
+        btnDelete.setOnAction(event -> ticketInteractor.getEventsForTicket(ticketItemModel, eventList -> {
+            StringBuilder deleteTicketFromEvent = new StringBuilder();
+
+            if (eventList != null && !eventList.isEmpty()) {
+                deleteTicketFromEvent.append("Billetten vil blive fjernet fra følgende events:\n");
+                for (EventItemModel eventItemModel : eventList)
+                    deleteTicketFromEvent
+                            .append("- ")
+                            .append(eventItemModel.nameProperty().get())
+                            .append("\n");
+            } else {
+                deleteTicketFromEvent.append("Billetten vil ikke blive fjernet fra nogle events.\n");
+            }
+
+            DialogHandler.showConfirmationDialog(
+                    "Bekræft slet Billet",
+                    "Bekræft slet af " + ticketItemModel.nameProperty().get(),
+                    "Bemærk, hvis du sletter dette, er billetten \"" + ticketItemModel.nameProperty().get() +
+                            "\" væk for altid.\n\n" +
+                            deleteTicketFromEvent.toString() +
+                            "\nEr du sikker på at du vil fortsætte?",
+                    () -> {
+                        ticketInteractor.deleteTicket(ticketItemModel);
+                        PageHandler.getInstance().setCurrentPage(Pages.TICKETS);
+                    });
+        }));
 
         btnAddEvent.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Styles.FLAT);
         btnEdit.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Styles.FLAT);
@@ -135,7 +165,8 @@ public class TicketItemViewController implements Initializable {
         tblViewEvents.setPlaceholder(lblNoEvents);
 
         tblViewEvents.setItems(ticketItemModel.getTicketEventItemModels());
-        tblColEventName.setCellValueFactory(cellData -> cellData.getValue().eventNameProperty());
+
+        tblColEventName.setCellValueFactory(cellData -> cellData.getValue().eventProperty().get().nameProperty());
         tblColTicketPrice.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asString());
 
         tblViewEvents.setRowFactory(tv -> new TableRow<TicketEventItemModel>() {
@@ -196,9 +227,9 @@ public class TicketItemViewController implements Initializable {
                         if (item != null) {
                             DialogHandler.showConfirmationDialog(
                                     "Fjern event fra billet",
-                                    "Bekræft fjernelse af billet fra " + item.eventNameProperty().get(),
-                                    "Bemærk, hvis du fjerner dette, vil alle købte billetter blive slettet fra \"" + item.eventNameProperty().get() + "\".\n\nEr du sikker på at du vil fortsætte?",
-                                    () -> MainModel.getInstance().getTicketItemViewModel().ticketItemModelProperty().get().getTicketEventItemModels().remove(item));
+                                    "Bekræft fjernelse af billet fra " + item.eventProperty().get().nameProperty().get(),
+                                    "Bemærk, hvis du fjerner dette, vil alle købte billetter blive slettet fra \"" + item.eventProperty().get().nameProperty().get() + "\".\n\nEr du sikker på at du vil fortsætte?",
+                                    () -> MainModel.getInstance().getTicketItemViewModel().ticketItemModel().getTicketEventItemModels().remove(item));
 
                         }
                     });
@@ -247,12 +278,12 @@ public class TicketItemViewController implements Initializable {
     }
 
     private void editTicketItem(TicketItemModel ticketItemModel) {
-        MainModel.getInstance().getEditTicketModel().ticketItemModelProperty().set(ticketItemModel);
+        ticketInteractor.getEditTicketModel().ticketItemModelProperty().set(ticketItemModel);
         ModalHandler.getInstance().getModalOverlay().showFXML(Modal.TICKET_EDIT);
     }
 
     private void goToEvent(TicketEventItemModel item) {
-        EventItemModel eventItemModel = eventInteractor.getEventFromId(item.eventIdProperty().get());
+        EventItemModel eventItemModel = eventInteractor.getEventFromId(item.eventProperty().get().idProperty().get());
 
         if (eventItemModel == null)
             return;

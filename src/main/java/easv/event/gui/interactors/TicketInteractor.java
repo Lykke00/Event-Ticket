@@ -2,19 +2,20 @@ package easv.event.gui.interactors;
 
 import easv.event.be.Event;
 import easv.event.be.Ticket;
+import easv.event.be.TicketEvent;
 import easv.event.be.TicketType;
 import easv.event.bll.TicketManager;
-import easv.event.gui.common.EventItemModel;
-import easv.event.gui.common.TicketItemModel;
-import easv.event.gui.common.TicketTypeItemModel;
-import easv.event.gui.common.TicketTypeModel;
+import easv.event.gui.common.*;
 import easv.event.gui.modals.EditTicket.EditTicketModel;
 import easv.event.gui.modals.EditTicketType.EditTicketTypeModel;
 import easv.event.gui.modals.NewTicketType.NewTicketTypeModel;
+import easv.event.gui.pages.Ticket.ItemView.TicketItemViewModel;
 import easv.event.gui.pages.Ticket.TicketModel;
 import easv.event.gui.utils.BackgroundTaskExecutor;
 import easv.event.gui.utils.DialogHandler;
 import easv.event.gui.utils.NotificationHandler;
+import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -28,6 +29,7 @@ public class TicketInteractor {
     private final NewTicketTypeModel newTicketTypeModel;
     private final EditTicketTypeModel editTicketTypeModel;
     private final EditTicketModel editTicketModel;
+    private final TicketItemViewModel ticketItemViewModel;
 
     public TicketInteractor() {
         this.ticketModel = new TicketModel();
@@ -35,6 +37,7 @@ public class TicketInteractor {
         this.newTicketTypeModel = new NewTicketTypeModel();
         this.editTicketTypeModel = new EditTicketTypeModel();
         this.editTicketModel = new EditTicketModel();
+        this.ticketItemViewModel = new TicketItemViewModel();
 
         try {
             this.ticketManager = new TicketManager();
@@ -309,6 +312,76 @@ public class TicketInteractor {
         );
     }
 
+    public void addTicketToEvent(TicketItemModel ticket, double price, ObservableList<EventItemModel> eventsToAdd, ObservableList<EventItemModel> eventsToRemove) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        List<Event> eventsToAddEntities = eventsToAdd.stream()
+                                .map(EventItemModel::toEntity)
+                                .toList();
+
+                        List<Event> eventsToRemoveEntities = eventsToRemove.stream()
+                                .map(EventItemModel::toEntity)
+                                .toList();
+
+                        Ticket ticketEntity = ticket.toEntity();
+                        TicketEvent ticketEvent = new TicketEvent(ticketEntity, price);
+
+                        return ticketManager.addTicketToEvent(ticketEvent, eventsToAddEntities, eventsToRemoveEntities);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Database fejl ved forsøg på at tilføje billet til event", e);
+                    }
+                },
+                tickets -> {
+                    List<TicketEventItemModel> eventToModel = tickets.stream()
+                            .map(TicketEventItemModel::fromEntity)
+                            .toList();
+
+                    ticket.getTicketEventItemModels().removeIf(ticketEvent ->
+                            eventsToRemove.stream().anyMatch(event -> event.idProperty().get() == ticketEvent.eventProperty().get().idProperty().get())
+                    );
+                    ticket.getTicketEventItemModels().addAll(eventToModel);
+
+                    if (!tickets.isEmpty() && !eventsToRemove.isEmpty())
+                        NotificationHandler.getInstance().showNotification( "Billetten er blevet tilføjet til " + tickets.size() + " event(s) og fjernet fra " + eventsToRemove.size() + " event(s)", NotificationHandler.NotificationType.SUCCESS);
+                    else if (!tickets.isEmpty())
+                        NotificationHandler.getInstance().showNotification("Billetten er blevet tilføjet til " + tickets.size() + " event(s)", NotificationHandler.NotificationType.SUCCESS);
+                    else if (!eventsToRemove.isEmpty())
+                        NotificationHandler.getInstance().showNotification("Billetten er blevet fjernet fra " + eventsToRemove.size() + " event(s)", NotificationHandler.NotificationType.SUCCESS);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", "Kunne ikke tilføje billet", exception);
+                }
+        );
+    }
+
+    public void getEventTicketsByEvent(TicketItemModel ticketItemModel) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        Ticket ticketEntity = ticketItemModel.toEntity();
+                        return ticketManager.getEventTicketsByTicket(ticketEntity);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Database fejl ved forsøg på at få fat i alle event billetter for billet", e);
+                    }
+                },
+                ticketEvents -> {
+                    List<TicketEventItemModel> ticketEventsModel = ticketEvents.stream()
+                            .map(TicketEventItemModel::fromEntity)
+                            .toList();
+
+                    ticketItemModel.getTicketEventItemModels().setAll(ticketEventsModel);
+                    ticketItemViewModel.ticketEventsProperty().setAll(ticketEventsModel);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", "Kunne ikke få fat i event billetter for billet", exception);
+                },
+                loading -> {
+                    ticketItemViewModel.databaseLoadingProperty().set(loading);
+                }
+        );
+    }
+
     public TicketModel getTicketModel() {
         return ticketModel;
     }
@@ -329,4 +402,7 @@ public class TicketInteractor {
         return editTicketModel;
     }
 
+    public TicketItemViewModel getTicketItemViewModel() {
+        return ticketItemViewModel;
+    }
 }

@@ -2,6 +2,7 @@ package easv.event.dal.dao;
 
 import easv.event.be.Event;
 import easv.event.be.Ticket;
+import easv.event.be.TicketEvent;
 import easv.event.be.TicketType;
 
 import java.util.List;
@@ -30,4 +31,8 @@ public interface ITicketDAO {
     List<Event> getEventsByTicket(Ticket ticket) throws Exception;
 
     boolean deleteTicket(Ticket ticket) throws Exception;
+
+    List<TicketEvent> addTicketToEvent(TicketEvent ticket, List<Event> eventsToAdd, List<Event> eventsToRemove) throws Exception;
+
+    List<TicketEvent> getTicketEventByTicket(Ticket ticket) throws Exception;
 }

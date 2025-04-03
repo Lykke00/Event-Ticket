@@ -1,30 +1,39 @@
 package easv.event.gui.common;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import easv.event.be.TicketEvent;
+import javafx.beans.property.*;
 
 public class TicketEventItemModel {
-    private final IntegerProperty eventId = new SimpleIntegerProperty();
-    private final StringProperty eventName = new SimpleStringProperty();
-    private final SimpleIntegerProperty price = new SimpleIntegerProperty();
+    private final SimpleIntegerProperty id = new SimpleIntegerProperty();
+    private final ObjectProperty<EventItemModel> event = new SimpleObjectProperty<>();
+    private final ObjectProperty<TicketItemModel> ticket = new SimpleObjectProperty<>();
+    private final SimpleDoubleProperty price = new SimpleDoubleProperty();
 
-    public TicketEventItemModel(int eventId, String eventName, int price) {
-        this.eventId.set(eventId);
-        this.eventName.set(eventName);
-        this.price.set(price);
+    public SimpleIntegerProperty idProperty() {
+        return id;
     }
 
-    public IntegerProperty eventIdProperty() {
-        return eventId;
+    public ObjectProperty<EventItemModel> eventProperty() {
+        return event;
     }
 
-    public StringProperty eventNameProperty() {
-        return eventName;
+    public ObjectProperty<TicketItemModel> ticketProperty() {
+        return ticket;
     }
 
-    public SimpleIntegerProperty priceProperty() {
+    public SimpleDoubleProperty priceProperty() {
         return price;
+    }
+
+    public static TicketEventItemModel fromEntity(TicketEvent ticketEvent) {
+        TicketEventItemModel item = new TicketEventItemModel();
+        if (ticketEvent.getEvent() != null)
+            item.eventProperty().set(EventItemModel.fromEntity(ticketEvent.getEvent()));
+
+        if (ticketEvent.getTicket() != null)
+            item.ticketProperty().set(TicketItemModel.fromEntity(ticketEvent.getTicket()));
+
+        item.priceProperty().set(ticketEvent.getPrice());
+        return item;
     }
 }
