@@ -1,9 +1,12 @@
 package easv.event.dal.dao;
 
+import easv.event.be.Event;
+import easv.event.be.Ticket;
 import easv.event.be.User;
 import easv.event.dal.DBConnector;
 import java.io.IOException;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -196,16 +199,79 @@ public class UserDAO implements IUserDAO {
     }
     @Override
     public boolean deleteCoordinator(User coordinator) throws Exception {
+        Connection conn = null;
+        String fullName = coordinator.getFirstName() + " " + coordinator.getLastName();
+        try {
+            conn = dbConnector.getConnection();
+            conn.setAutoCommit(false);
+
+            String deleteTicketsSQL = "DELETE FROM events_coordinators WHERE user_id = ?";
+            try (PreparedStatement ticketStmt = conn.prepareStatement(deleteTicketsSQL)) {
+                ticketStmt.setInt(1, coordinator.getId());
+                ticketStmt.executeUpdate();
+            }
+
+            String deleteTicketTypeSQL = "DELETE FROM users WHERE id = ?";
+            try (PreparedStatement typeStmt = conn.prepareStatement(deleteTicketTypeSQL)) {
+                typeStmt.setInt(1, coordinator.getId());
+                typeStmt.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    throw new Exception("Kunne ikke rulle transaktionen tilbage", rollbackEx);
+                }
+            }
+            throw new Exception("Kunne ikke slette " + fullName + " fra databasen", e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    throw new Exception("Kunne ikke lukke databaseforbindelsen", closeEx);
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<Event> getEventsByCoordinator(User coordinator) throws Exception {
+        List<Event> events = new ArrayList<>();
+
         String query = """
-                DELETE FROM users WHERE id = ? AND role = 1
-                """;
+             SELECT events.* FROM events_coordinators
+             JOIN events ON events_coordinators.event_id = events.id
+             WHERE events_coordinators.user_id = ? AND events.active = 1
+            """;
 
-        Connection conn = dbConnector.getConnection();
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
             stmt.setInt(1, coordinator.getId());
+            ResultSet rs = stmt.executeQuery();
 
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String title = rs.getString("title");
+                String description = rs.getString("description");
+                LocalDate date = rs.getDate("date").toLocalDate();
+                String startsAt = rs.getString("starts_at");
+                String location = rs.getString("location");
+                boolean active = rs.getBoolean("active");
+
+                Event event = new Event(id, title, description, date, startsAt, location, active);
+                events.add(event);
+            }
+
+            return events;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke hente alle events for bruger i databasen", e);
         }
     }
 }

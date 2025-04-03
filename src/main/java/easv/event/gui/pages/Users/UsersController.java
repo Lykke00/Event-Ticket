@@ -3,6 +3,7 @@ package easv.event.gui.pages.Users;
 import atlantafx.base.controls.CustomTextField;
 import atlantafx.base.theme.Styles;
 import easv.event.gui.MainModel;
+import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.UserModel;
 import easv.event.enums.UserRole;
 import easv.event.gui.interactors.UserInteractor;
@@ -136,22 +137,30 @@ public class UsersController implements Initializable, IPageController {
                     btnDelete.setOnAction(event -> {
                         UserModel item = getTableRow().getItem();
                         if (item != null) {
-                            if (item.roleProperty().get() == UserRole.COORDINATOR) {
-                                // For koordinatorer
+                            userInteractor.getEventsByCoordinator(item, eventList -> {
+                                StringBuilder deleteUserFromEvent = new StringBuilder();
+
+                                if (eventList != null && !eventList.isEmpty()) {
+                                    deleteUserFromEvent.append("Brugeren vil blive fjernet fra følgende events:\n");
+                                    for (EventItemModel eventItemModel : eventList)
+                                        deleteUserFromEvent
+                                                .append("- ")
+                                                .append(eventItemModel.nameProperty().get())
+                                                .append("\n");
+                                } else {
+                                    deleteUserFromEvent.append("Brugeren vil ikke blive fjernet fra nogle events.\n");
+                                }
+
+                                String fullName = item.firstNameProperty().get() + " " + item.lastNameProperty().get();
                                 DialogHandler.showConfirmationDialog(
-                                        "Slet koordinator",
-                                        "Bekræft slettelse af koordinator " + item.firstNameProperty().get() + " " + item.lastNameProperty().get(),
-                                        "Bemærk, hvis du fjerner denne koordinator, vil alle data fra koordinatoren blive slettet.\n\nEr du sikker på at du vil fortsætte?",
+                                        "Bekræft slet koordinator",
+                                        "Bekræft slettelse af koordinator " + fullName,
+                                        "Bemærk, hvis du sletter denne bruger, vil alle data fra koordinatoren \"" + fullName +
+                                                "\" blive slettet for altid.\n\n" +
+                                                deleteUserFromEvent.toString() +
+                                                "\nEr du sikker på at du vil fortsætte?",
                                         () -> userInteractor.deleteCoordinator(item));
-                            } else {
-                                // For almindelige brugere
-                                // forstår ikke lige den her, så skal i have en ny metode??
-                                DialogHandler.showConfirmationDialog(
-                                        "Slet bruger",
-                                        "Bekræft slettelse af konti " + item.firstNameProperty().get() + " " + item.lastNameProperty().get(),
-                                        "Bemærk, hvis du fjerner denne konti, vil alle data fra brugeren blive slettet.\n\nEr du sikker på at du vil fortsætte?",
-                                        () -> MainModel.getInstance().getUsersModel().deleteUser(item));
-                            }
+                            });
                         }
                     });
 

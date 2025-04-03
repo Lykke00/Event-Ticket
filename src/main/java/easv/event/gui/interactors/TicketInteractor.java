@@ -290,7 +290,6 @@ public class TicketInteractor {
         );
     }
 
-
     public void deleteTicket(TicketItemModel ticket) {
         BackgroundTaskExecutor.execute(
                 () -> {

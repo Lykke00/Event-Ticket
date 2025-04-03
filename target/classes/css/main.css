@@ -32,6 +32,10 @@
     -fx-border-color: transparent transparent #a48e7c transparent;
 }
 
+.header-logo-click {
+    -fx-cursor: hand;
+}
+
 .header-tab-pane .tab {
     -fx-background-color: none;
     -fx-text-fill: -text-primary;

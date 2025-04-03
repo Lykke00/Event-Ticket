@@ -1,5 +1,6 @@
 package easv.event.dal.dao;
 
+import easv.event.be.Event;
 import easv.event.be.User;
 
 import java.util.List;
@@ -12,5 +13,5 @@ public interface IUserDAO {
     List<User> getAllCoordinators() throws Exception;
     List<User> getAll() throws Exception;
     boolean deleteCoordinator(User coordinator) throws Exception;
-
+    List<Event> getEventsByCoordinator(User coordinator) throws Exception;
 }

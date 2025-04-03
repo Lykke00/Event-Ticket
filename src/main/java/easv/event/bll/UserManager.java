@@ -1,5 +1,6 @@
 package easv.event.bll;
 
+import easv.event.be.Event;
 import easv.event.be.User;
 import easv.event.dal.dao.IUserDAO;
 import easv.event.dal.dao.UserDAO;
@@ -48,30 +49,17 @@ public class UserManager {
         return userDAO.getAll();
     }
 
-    public static void main(String[] args) {
-        UserManager userManager = null;
-        try {
-            userManager = new UserManager();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
-            User user = userManager.authenticateUser("hej@test.com", "kode123");
-            System.out.println(user.getLocation());
-            //userManager.registerUser("hej@test.com", "kode123");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public boolean deleteCoordinator(User coordinator) throws Exception {
         // Tjekker om brugeren faktisk er en koordinator
-        if (coordinator.getRole() != UserRole.COORDINATOR) {
+        if (coordinator.getRole() != UserRole.COORDINATOR)
             throw new Exception("Brugeren er ikke en koordinator");
-        }
+
         // Kalder DAL-laget for at slette koordinatoren
         return userDAO.deleteCoordinator(coordinator);
+    }
+
+    public List<Event> getEventsByCoordinator(User coordinator) throws Exception {
+        return userDAO.getEventsByCoordinator(coordinator);
     }
 }
 

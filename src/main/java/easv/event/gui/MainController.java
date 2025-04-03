@@ -9,6 +9,7 @@ import easv.event.gui.pages.Pages;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -36,7 +37,11 @@ public class MainController implements Initializable {
     @FXML
     private Button btnEventsPage, btnTicketPage, btnUsersPage, btnLogOut;
 
+    @FXML
+    private HBox hBoxLogo;
+
     private final ArrayList<Button> headerButtons = new ArrayList<>();
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -45,6 +50,8 @@ public class MainController implements Initializable {
 
         pageHandler.setBorderPane(mainWindow);
         setupTabBtns();
+
+        logoClickReturnHome();
 
         //TODO: User permission, tilføj tilbage når alt er lavet
         //userPermissionView();
@@ -55,6 +62,14 @@ public class MainController implements Initializable {
         boolean isCoordinator = authModel.userProperty().get().roleProperty().get().equals(UserRole.COORDINATOR);
         if (isCoordinator)
             hBoxTabs.getChildren().remove(btnUsersPage);
+    }
+
+    private void logoClickReturnHome() {
+        hBoxLogo.getStyleClass().add("header-logo-click");
+        hBoxLogo.setOnMouseClicked(event -> {
+            PageHandler.getInstance().setCurrentPage(Pages.EVENT);
+            updateActiveBtn(btnEventsPage);
+        });
     }
 
     /* Lambda udtryk til at register tryk på de forskellige knapper */

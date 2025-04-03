@@ -3,6 +3,8 @@ package easv.event.gui.interactors;
 import easv.event.be.User;
 import easv.event.bll.UserManager;
 import easv.event.gui.common.EventItemModel;
+import easv.event.gui.common.TicketItemModel;
+import easv.event.gui.common.UserDeleteModel;
 import easv.event.gui.common.UserModel;
 import easv.event.gui.pages.Users.UsersModel;
 import easv.event.gui.utils.BackgroundTaskExecutor;
@@ -13,15 +15,19 @@ import javafx.beans.property.SimpleBooleanProperty;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class UserInteractor {
     private UserManager userManager;
+
     private final UsersModel usersModel;
+    private final UserDeleteModel userDeleteModel;
 
     private BooleanProperty loadingCoordinatorsFromDbProperty = new SimpleBooleanProperty(false);
 
     public UserInteractor(UsersModel usersModel) {
         this.usersModel = usersModel;
+        this.userDeleteModel = new UserDeleteModel();
 
         try {
             this.userManager = new UserManager();
@@ -85,14 +91,6 @@ public class UserInteractor {
         );
     }
 
-    public BooleanProperty loadingCoordinatorsFromDbProperty() {
-        return loadingCoordinatorsFromDbProperty;
-    }
-
-    public UsersModel getUsersModel() {
-        return usersModel;
-    }
-
     public void deleteCoordinator(UserModel coordinatorModel) {
         BackgroundTaskExecutor.execute(
                 () -> {
@@ -116,4 +114,35 @@ public class UserInteractor {
         );
     }
 
+    public void getEventsByCoordinator(UserModel coordinatorModel, Consumer<List<EventItemModel>> callback) {
+        String err = "Database fejl ved forsøg på at få fat i events fra bruger";
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        return userManager.getEventsByCoordinator(UserModel.toEntity(coordinatorModel));
+                    } catch (Exception e) {
+                        throw new RuntimeException(err, e);
+                    }
+                },
+                exists -> {
+                    List<EventItemModel> eventItemModels = exists.stream()
+                            .map(EventItemModel::fromEntity)
+                            .toList();
+
+                    callback.accept(eventItemModels);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", err, exception);
+                    callback.accept(null);
+                }
+        );
+    }
+
+    public BooleanProperty loadingCoordinatorsFromDbProperty() {
+        return loadingCoordinatorsFromDbProperty;
+    }
+
+    public UsersModel getUsersModel() {
+        return usersModel;
+    }
 }
