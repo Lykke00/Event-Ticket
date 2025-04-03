@@ -103,6 +103,7 @@ public class UserInteractor {
                     }
                 },
                 didDelete -> {
+                    usersModel.usersModelObservableList().remove(coordinatorModel);
                     usersModel.coordinatorListModelObservableList().remove(coordinatorModel);
                     NotificationHandler.getInstance().showNotification(
                             "Koordinator " + coordinatorModel.firstNameProperty().get() + " " +

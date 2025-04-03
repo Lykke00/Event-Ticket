@@ -162,6 +162,7 @@ public class UserDAO implements IUserDAO {
             ResultSet resultSet = stmt.executeQuery();
 
             while (resultSet.next()) {
+                int id = resultSet.getInt("id");
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
                 String userEmail = resultSet.getString("email");
@@ -169,7 +170,7 @@ public class UserDAO implements IUserDAO {
                 String location = resultSet.getString("location");
                 String role = resultSet.getString("role_name");
 
-                User user = new User(firstName, lastName, userEmail, location, role, passwordHash);
+                User user = new User(id, firstName, lastName, userEmail, location, role, passwordHash);
                 users.add(user);
             }
 
@@ -195,7 +196,9 @@ public class UserDAO implements IUserDAO {
     }
     @Override
     public boolean deleteCoordinator(User coordinator) throws Exception {
-        String query = "DELETE FROM Users WHERE id = ? AND role = 'COORDINATOR'";
+        String query = """
+                DELETE FROM users WHERE id = ? AND role = 1
+                """;
 
         Connection conn = dbConnector.getConnection();
         try (PreparedStatement stmt = conn.prepareStatement(query)) {

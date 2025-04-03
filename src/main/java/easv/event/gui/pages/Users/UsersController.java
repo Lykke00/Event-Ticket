@@ -142,9 +142,10 @@ public class UsersController implements Initializable, IPageController {
                                         "Slet koordinator",
                                         "Bekræft slettelse af koordinator " + item.firstNameProperty().get() + " " + item.lastNameProperty().get(),
                                         "Bemærk, hvis du fjerner denne koordinator, vil alle data fra koordinatoren blive slettet.\n\nEr du sikker på at du vil fortsætte?",
-                                        () -> MainModel.getInstance().getUsersModel().deleteCoordinator(item));
+                                        () -> userInteractor.deleteCoordinator(item));
                             } else {
                                 // For almindelige brugere
+                                // forstår ikke lige den her, så skal i have en ny metode??
                                 DialogHandler.showConfirmationDialog(
                                         "Slet bruger",
                                         "Bekræft slettelse af konti " + item.firstNameProperty().get() + " " + item.lastNameProperty().get(),
