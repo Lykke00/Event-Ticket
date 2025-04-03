@@ -7,6 +7,7 @@ import easv.event.gui.common.UserModel;
 import easv.event.gui.pages.Users.UsersModel;
 import easv.event.gui.utils.BackgroundTaskExecutor;
 import easv.event.gui.utils.DialogHandler;
+import easv.event.gui.utils.NotificationHandler;
 
 import java.io.IOException;
 
@@ -70,6 +71,8 @@ public class AuthInteractor {
                 createdUser -> {
                     UserModel createdModel = UserModel.fromEntity(createdUser);
                     usersModel.usersModelObservableList().add(createdModel);
+
+                    NotificationHandler.getInstance().showNotification(user.getFirstName() + " " + user.getLastName() + " med rollen: " + user.getRole().getRole() + " er blevet oprettet", NotificationHandler.NotificationType.SUCCESS);
                 },
                 exception -> {
                     DialogHandler.showExceptionError("Database fejl", "Kunne ikke oprette bruger", exception);
