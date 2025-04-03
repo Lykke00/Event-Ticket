@@ -58,6 +58,10 @@ public class UserManager {
         return userDAO.deleteCoordinator(coordinator);
     }
 
+    public boolean editCoordinator(User coordinator) throws Exception {
+        return userDAO.editCoordinator(coordinator);
+    }
+
     public List<Event> getEventsByCoordinator(User coordinator) throws Exception {
         return userDAO.getEventsByCoordinator(coordinator);
     }

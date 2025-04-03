@@ -91,7 +91,7 @@ public class EventController implements Initializable, IPageController {
         loadSortEventBox();
 
         //TODO: User permission, tilføj tilbage når alt er lavet
-        //userPermissionView();
+        userPermissionView();
 
         setCardDetails();
         updateTableView();
@@ -284,7 +284,7 @@ public class EventController implements Initializable, IPageController {
                     hBox.setAlignment(Pos.CENTER_RIGHT);
 
                     //TODO: User permission, tilføj tilbage når alt er lavet
-                    //userPermissionViewControls(hBox, btnEdit);
+                    userPermissionViewControls(hBox, btnEdit);
                 }
 
                 @Override

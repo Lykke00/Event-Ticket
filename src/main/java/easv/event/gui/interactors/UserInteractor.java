@@ -6,6 +6,7 @@ import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.TicketItemModel;
 import easv.event.gui.common.UserDeleteModel;
 import easv.event.gui.common.UserModel;
+import easv.event.gui.modals.UserEdit.UserEditModel;
 import easv.event.gui.pages.Users.UsersModel;
 import easv.event.gui.utils.BackgroundTaskExecutor;
 import easv.event.gui.utils.DialogHandler;
@@ -22,12 +23,14 @@ public class UserInteractor {
 
     private final UsersModel usersModel;
     private final UserDeleteModel userDeleteModel;
+    private final UserEditModel userEditModel;
 
     private BooleanProperty loadingCoordinatorsFromDbProperty = new SimpleBooleanProperty(false);
 
     public UserInteractor(UsersModel usersModel) {
         this.usersModel = usersModel;
         this.userDeleteModel = new UserDeleteModel();
+        this.userEditModel = new UserEditModel();
 
         try {
             this.userManager = new UserManager();
@@ -114,6 +117,28 @@ public class UserInteractor {
         );
     }
 
+    public void editCoordinator(UserModel original, UserModel updated) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        return userManager.editCoordinator(UserModel.toEntity(updated));
+                    } catch (Exception e) {
+                        throw new RuntimeException("Database fejl ved forsøg på at redigere koordinator", e);
+                    }
+                },
+                didUpdate -> {
+                    original.updateModel(updated);
+                    NotificationHandler.getInstance().showNotification(
+                            "Koordinator " + original.firstNameProperty().get() + " " +
+                                    original.lastNameProperty().get() + " er blevet redigeret",
+                            NotificationHandler.NotificationType.SUCCESS);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", "Kunne ikke redigere koordinator", exception);
+                }
+        );
+    }
+
     public void getEventsByCoordinator(UserModel coordinatorModel, Consumer<List<EventItemModel>> callback) {
         String err = "Database fejl ved forsøg på at få fat i events fra bruger";
         BackgroundTaskExecutor.execute(
@@ -144,5 +169,9 @@ public class UserInteractor {
 
     public UsersModel getUsersModel() {
         return usersModel;
+    }
+
+    public UserEditModel getUserEditModel() {
+        return userEditModel;
     }
 }

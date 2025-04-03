@@ -129,7 +129,7 @@ public class UsersController implements Initializable, IPageController {
                     btnEdit.setOnAction(event -> {
                         UserModel item = getTableRow().getItem();
                         if (item != null) {
-                            MainModel.getInstance().getUserEditModel().userModelProperty().set(item);
+                            userInteractor.getUserEditModel().userModelProperty().set(item);
                             ModalHandler.getInstance().getModalOverlay().showFXML(Modal.USER_EDIT);
                         }
                     });

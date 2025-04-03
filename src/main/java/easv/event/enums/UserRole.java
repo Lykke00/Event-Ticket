@@ -1,17 +1,23 @@
 package easv.event.enums;
 
 public enum UserRole {
-    ADMIN("Administrator"),
-    COORDINATOR("Koordinator");
+    ADMIN("Administrator", 2),
+    COORDINATOR("Koordinator", 1);
 
     private final String role;
+    private final int id;
 
-    UserRole(String role) {
+    UserRole(String role, int id) {
         this.role = role;
+        this.id = id;
     }
 
     public String getRole() {
         return role;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public static UserRole fromRole(String role) {

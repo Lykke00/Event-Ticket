@@ -14,4 +14,5 @@ public interface IUserDAO {
     List<User> getAll() throws Exception;
     boolean deleteCoordinator(User coordinator) throws Exception;
     List<Event> getEventsByCoordinator(User coordinator) throws Exception;
+    boolean editCoordinator(User coordinator) throws Exception;
 }

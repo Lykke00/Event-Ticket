@@ -6,6 +6,8 @@ import easv.event.gui.utils.DialogHandler;
 import easv.event.gui.utils.PageData;
 import easv.event.gui.utils.PageHandler;
 import easv.event.gui.pages.Pages;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -42,7 +44,6 @@ public class MainController implements Initializable {
 
     private final ArrayList<Button> headerButtons = new ArrayList<>();
 
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         headerButtons.addAll(Arrays.asList(btnEventsPage, btnTicketPage, btnUsersPage, btnLogOut));
@@ -54,14 +55,22 @@ public class MainController implements Initializable {
         logoClickReturnHome();
 
         //TODO: User permission, tilføj tilbage når alt er lavet
-        //userPermissionView();
+        userPermissionView();
     }
 
     // fjern bruger tabben hvis permissions ikke er korrekt
     private void userPermissionView() {
-        boolean isCoordinator = authModel.userProperty().get().roleProperty().get().equals(UserRole.COORDINATOR);
-        if (isCoordinator)
-            hBoxTabs.getChildren().remove(btnUsersPage);
+        authModel.loggedInProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    boolean isCoordinator = authModel.userProperty().get().roleProperty().get().equals(UserRole.COORDINATOR);
+                    if (isCoordinator)
+                        hBoxTabs.getChildren().remove(btnUsersPage);
+                }
+            }
+        });
+
     }
 
     private void logoClickReturnHome() {

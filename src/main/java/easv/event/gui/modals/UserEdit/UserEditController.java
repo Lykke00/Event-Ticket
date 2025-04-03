@@ -3,6 +3,7 @@ package easv.event.gui.modals.UserEdit;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.UserModel;
 import easv.event.enums.UserRole;
+import easv.event.gui.interactors.UserInteractor;
 import easv.event.gui.utils.ModalHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -20,6 +21,7 @@ import java.util.ResourceBundle;
 import java.util.function.Function;
 
 public class UserEditController implements Initializable {
+    private final UserInteractor userInteractor = MainModel.getInstance().getUserInteractor();
     @FXML
     private TextField txtFieldName, txtFieldSurname, txtFieldLocation, txtFieldEmail;
 
@@ -81,7 +83,7 @@ public class UserEditController implements Initializable {
     }
 
     private void updateBindings() {
-        UserEditModel userEditModel = MainModel.getInstance().getUserEditModel();
+        UserEditModel userEditModel = userInteractor.getUserEditModel();
         bindProperty(userEditModel, txtFieldName.textProperty(), UserModel::firstNameProperty);
         bindProperty(userEditModel, txtFieldSurname.textProperty(), UserModel::lastNameProperty);
         bindProperty(userEditModel, txtFieldLocation.textProperty(), UserModel::locationProperty);
@@ -120,13 +122,16 @@ public class UserEditController implements Initializable {
 
     @FXML
     private void btnActionEditUser(ActionEvent actionEvent) {
-        UserModel userModel = MainModel.getInstance().getUserEditModel().userModelProperty().get();
+        UserModel original = userInteractor.getUserEditModel().userModelProperty().get();
+        UserModel copy = UserModel.copy(original);
 
-        userModel.firstNameProperty().set(txtFieldName.getText());
-        userModel.lastNameProperty().set(txtFieldSurname.getText());
-        userModel.locationProperty().set(txtFieldLocation.getText());
-        userModel.emailProperty().set(txtFieldEmail.getText());
-        userModel.roleProperty().set(comboBoxType.getValue());
+        copy.firstNameProperty().set(txtFieldName.getText());
+        copy.lastNameProperty().set(txtFieldSurname.getText());
+        copy.locationProperty().set(txtFieldLocation.getText());
+        copy.emailProperty().set(txtFieldEmail.getText());
+        copy.roleProperty().set(comboBoxType.getValue());
+
+        userInteractor.editCoordinator(original, copy);
 
         ModalHandler.getInstance().hideModal();
     }

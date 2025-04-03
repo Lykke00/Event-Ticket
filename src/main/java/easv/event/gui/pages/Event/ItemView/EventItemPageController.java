@@ -153,7 +153,7 @@ public class EventItemPageController implements Initializable {
         });
 
         //TODO: User permission, tilføj tilbage når alt er lavet
-        //userPermissionView(controlsBox, btnEdit);
+        userPermissionView(controlsBox, btnEdit);
         addCoordinators(eventItemModel);
     }
 

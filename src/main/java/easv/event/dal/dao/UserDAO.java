@@ -274,5 +274,28 @@ public class UserDAO implements IUserDAO {
             throw new Exception("Kunne ikke hente alle events for bruger i databasen", e);
         }
     }
+
+    @Override
+    public boolean editCoordinator(User coordinator) throws Exception {
+        String query = """
+                UPDATE users
+                SET first_name = ?,  last_name = ?, email = ?, role = ?, location = ?
+                WHERE id = ?
+                """;
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, coordinator.getFirstName());
+            stmt.setString(2, coordinator.getLastName());
+            stmt.setString(3, coordinator.getEmail());
+            stmt.setInt(4, coordinator.getRole().getId());
+            stmt.setString(5, coordinator.getLocation());
+            stmt.setInt(6, coordinator.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new Exception("Kunne ikke redigere koordinatoren i databasen",e);
+        }
+    }
 }
 

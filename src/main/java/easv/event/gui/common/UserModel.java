@@ -59,4 +59,16 @@ public class UserModel {
     public String toString() {
         return firstName.get() + " " + lastName.get() + " (" + location.get() + ")";
     }
+
+    public static UserModel copy(UserModel user) {
+        return new UserModel(user.id.get(), user.firstName.get(), user.lastName.get(), user.location.get(), user.email.get(), user.role.get());
+    }
+
+    public void updateModel(UserModel updated) {
+        this.firstName.set(updated.firstName.get());
+        this.lastName.set(updated.lastName.get());
+        this.email.set(updated.email.get());
+        this.role.set(updated.role.get());
+        this.location.set(updated.location.get());
+    }
 }

@@ -3,6 +3,7 @@ package easv.event.gui.pages.Login;
 import atlantafx.base.controls.CustomTextField;
 import atlantafx.base.controls.PasswordTextField;
 import atlantafx.base.theme.Styles;
+import easv.event.gui.MainController;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.AuthModel;
 import easv.event.gui.interactors.AuthInteractor;
