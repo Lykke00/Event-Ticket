@@ -17,6 +17,8 @@ import easv.event.gui.utils.ModalHandler;
 import easv.event.gui.utils.PageHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

@@ -2,10 +2,12 @@ package easv.event.gui;
 
 import easv.event.enums.UserRole;
 import easv.event.gui.common.AuthModel;
+import easv.event.gui.common.UserModel;
 import easv.event.gui.utils.DialogHandler;
 import easv.event.gui.utils.PageData;
 import easv.event.gui.utils.PageHandler;
 import easv.event.gui.pages.Pages;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -56,17 +58,29 @@ public class MainController implements Initializable {
 
         //TODO: User permission, tilføj tilbage når alt er lavet
         userPermissionView();
+
+        btnUsersPage.disableProperty().bind(
+                authModel.userProperty().flatMap(user ->
+                        user.roleProperty().isEqualTo(UserRole.COORDINATOR)
+                )
+        );
     }
 
     // fjern bruger tabben hvis permissions ikke er korrekt
     private void userPermissionView() {
-        authModel.loggedInProperty().addListener(new ChangeListener<Boolean>() {
+
+        authModel.userProperty().addListener(new ChangeListener<UserModel>() {
             @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if (newValue) {
+            public void changed(ObservableValue<? extends UserModel> observable, UserModel oldValue, UserModel newValue) {
+                if (newValue != null) {
                     boolean isCoordinator = authModel.userProperty().get().roleProperty().get().equals(UserRole.COORDINATOR);
-                    if (isCoordinator)
-                        hBoxTabs.getChildren().remove(btnUsersPage);
+                    //if (isCoordinator && hBoxTabs.getChildren().)
+                    btnUsersPage.visibleProperty().bind(
+                            authModel.userProperty().flatMap(user ->
+                                    user.roleProperty().isEqualTo(UserRole.COORDINATOR).not()
+                            )
+                    );
+                        //hBoxTabs.getChildren().(btnUsersPage);
                 }
             }
         });

@@ -31,11 +31,10 @@ public class EventManager {
         return eventDAO.getAllEvents();
     }
 
-    public Event createEvent(Event event) throws Exception {
+    public Event createEvent(Event event, User user) throws Exception {
         Event createdEvent = eventDAO.createEvent(event);
 
         if (createdEvent != null) {
-            User user = new User(1, "Lykke", "Bernberg", "lykber01@easv.dk", "Koordinator", "Bramming");
             boolean assign = assignCoordinator(event, user);
 
             if (assign) {

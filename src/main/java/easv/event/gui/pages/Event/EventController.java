@@ -8,6 +8,7 @@ import easv.event.enums.UserRole;
 import easv.event.gui.MainModel;
 import easv.event.gui.common.AuthModel;
 import easv.event.gui.common.EventItemModel;
+import easv.event.gui.common.UserModel;
 import easv.event.gui.interactors.AuthInteractor;
 import easv.event.gui.interactors.EventInteractor;
 import easv.event.gui.modals.Modal;
@@ -15,6 +16,8 @@ import easv.event.gui.pages.IPageController;
 import easv.event.gui.pages.Pages;
 import easv.event.gui.utils.*;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -98,11 +101,28 @@ public class EventController implements Initializable, IPageController {
         createTableRowClick();
         initializeFilteredList();
         setupTextFieldSearch();
+
+        authModel.userProperty().addListener(new ChangeListener<UserModel>() {
+            @Override
+            public void changed(ObservableValue<? extends UserModel> observable, UserModel oldValue, UserModel newValue) {
+                if (newValue != null) {
+                    eventInteractor.initialize();
+                    updateTableView();
+                    btnAddNewEvent.visibleProperty().bind(
+                            authModel.userProperty().get().roleProperty().isEqualTo(UserRole.COORDINATOR)
+                    );
+                }
+            }
+        });
     }
 
     @Override
     public void load() {
         eventInteractor.initialize();
+
+      //  btnAddNewEvent.visibleProperty().bind(
+     //           authModel.userProperty().get().roleProperty().isEqualTo(UserRole.COORDINATOR)
+     //   );
     }
 
     private void loadSortEventBox() {

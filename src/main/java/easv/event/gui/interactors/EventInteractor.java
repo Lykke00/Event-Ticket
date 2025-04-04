@@ -135,8 +135,9 @@ public class EventInteractor {
         BackgroundTaskExecutor.execute(
                 () -> {
                     try {
+                        UserModel loggedInUserModel = MainModel.getInstance().getAuthInteractor().getAuthModel().userProperty().get();
                         Event event = EventItemModel.toEntity(eventItemModel);
-                        return eventManager.createEvent(event);
+                        return eventManager.createEvent(event, UserModel.toEntity(loggedInUserModel));
                     } catch (Exception e) {
                         throw new RuntimeException("En fejl skete ved at prøve og oprette et nyt Event", e);
                     }
@@ -144,6 +145,8 @@ public class EventInteractor {
                 createdEvent -> {
                     EventItemModel createdEventItemModel = EventItemModel.fromEntity(createdEvent);
                     eventModel.addEvent(createdEventItemModel);
+                    NotificationHandler.getInstance().showNotification( "Eventet " + createdEventItemModel.nameProperty().get() + " er blevet oprettet", NotificationHandler.NotificationType.SUCCESS);
+
                 },
                 exception -> {
                     DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke hente data for bruger", exception);
@@ -164,6 +167,9 @@ public class EventInteractor {
                 updated -> {
                     if (updated)
                         original.updateModel(updatedModel);
+
+                    NotificationHandler.getInstance().showNotification( "Eventet " + updatedModel.nameProperty().get() + " er blevet redigeret", NotificationHandler.NotificationType.SUCCESS);
+
                 },
                 exception -> {
                     DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke hente data for bruger", exception);
@@ -195,6 +201,7 @@ public class EventInteractor {
 
                     eventItemModel.coordinatorsProperty().setAll(added);
                     eventItemModel.coordinatorsProperty().removeAll(removed);
+                    NotificationHandler.getInstance().showNotification( "Eventet har fået ændret tildelte koordinatore", NotificationHandler.NotificationType.SUCCESS);
                 },
                 exception -> {
                     DialogHandler.showExceptionError("Database fejl", "EventDAO kunne ikke ændre koordinatore for event", exception);
