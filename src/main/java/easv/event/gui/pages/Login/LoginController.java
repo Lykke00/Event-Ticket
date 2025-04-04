@@ -17,6 +17,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -24,6 +25,8 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.feather.Feather;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -73,6 +76,16 @@ public class LoginController implements Initializable {
                 }
             }
         });
+
+        var eyeIcon = new FontIcon(Feather.EYE_OFF);
+        eyeIcon.setCursor(Cursor.HAND);
+        eyeIcon.setOnMouseClicked(e -> {
+            eyeIcon.setIconCode(txtFieldPassword.getRevealPassword()
+            ? Feather.EYE_OFF : Feather.EYE);
+            txtFieldPassword.setRevealPassword(!txtFieldPassword.getRevealPassword());
+        });
+
+        txtFieldPassword.setRight(eyeIcon);
     }
 
     private void validate() {
