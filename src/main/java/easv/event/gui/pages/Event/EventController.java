@@ -11,6 +11,7 @@ import easv.event.gui.common.EventItemModel;
 import easv.event.gui.common.UserModel;
 import easv.event.gui.interactors.AuthInteractor;
 import easv.event.gui.interactors.EventInteractor;
+import easv.event.gui.interactors.TicketInteractor;
 import easv.event.gui.modals.Modal;
 import easv.event.gui.pages.IPageController;
 import easv.event.gui.pages.Pages;
@@ -38,6 +39,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class EventController implements Initializable, IPageController {
+    private final TicketInteractor ticketInteractor = MainModel.getInstance().getTicketInteractor();
     private final EventInteractor eventInteractor = MainModel.getInstance().getEventInteractor();
     private final AuthModel authModel = MainModel.getInstance().getAuthInteractor().getAuthModel();
 
@@ -67,9 +69,6 @@ public class EventController implements Initializable, IPageController {
     private TableColumn<EventItemModel, String> tblColTime;
 
     @FXML
-    private TableColumn<EventItemModel, String> tblColSoldTickets;
-
-    @FXML
     private Card cardTotalTickets, cardUpcomingEvents, cardCompletedEvents;
 
     @FXML
@@ -80,6 +79,10 @@ public class EventController implements Initializable, IPageController {
 
     @FXML
     private ComboBox<String> cmbBoxEvents;
+
+    @FXML
+    private Label lblSignedIn;
+
 
     public EventController() {}
 
@@ -102,6 +105,9 @@ public class EventController implements Initializable, IPageController {
         initializeFilteredList();
         setupTextFieldSearch();
 
+        UserModel userModel = authModel.userProperty().get();
+        lblSignedIn.setText(userModel.roleProperty().get().getRole() + ": " + userModel.firstNameProperty().get() + " " + userModel.lastNameProperty().get());
+
         authModel.userProperty().addListener(new ChangeListener<UserModel>() {
             @Override
             public void changed(ObservableValue<? extends UserModel> observable, UserModel oldValue, UserModel newValue) {
@@ -111,6 +117,8 @@ public class EventController implements Initializable, IPageController {
                     btnAddNewEvent.visibleProperty().bind(
                             authModel.userProperty().get().roleProperty().isEqualTo(UserRole.COORDINATOR)
                     );
+
+                    lblSignedIn.setText(newValue.roleProperty().get().getRole() + ": " + newValue.firstNameProperty().get() + " " + newValue.lastNameProperty().get());
                 }
             }
         });
@@ -120,9 +128,9 @@ public class EventController implements Initializable, IPageController {
     public void load() {
         eventInteractor.initialize();
 
-      //  btnAddNewEvent.visibleProperty().bind(
-     //           authModel.userProperty().get().roleProperty().isEqualTo(UserRole.COORDINATOR)
-     //   );
+        //  btnAddNewEvent.visibleProperty().bind(
+        //           authModel.userProperty().get().roleProperty().isEqualTo(UserRole.COORDINATOR)
+        //   );
     }
 
     private void loadSortEventBox() {
@@ -226,35 +234,32 @@ public class EventController implements Initializable, IPageController {
                 )
         );
 
-        tblColSoldTickets.setCellValueFactory(cellData ->
-                Bindings.createStringBinding(
-                        () -> cellData.getValue().soldTicketsProperty().get() + " billetter",
-                        cellData.getValue().soldTicketsProperty()
-                )
-        );
-
         TableColumn<EventItemModel, Void> tblColActions = new TableColumn<>("");
 
         tblColActions.setCellFactory(col -> {
             TableCell<EventItemModel, Void> cell = new TableCell<>() {
                 private final Button btnView = new Button(null, new FontIcon(Feather.EYE));
+                private final Button btnSellTicket = new Button(null, new FontIcon(Feather.SHOPPING_CART));
                 private final Button btnAssign = new Button(null, new FontIcon(Feather.USER_PLUS));
                 private final Button btnEdit = new Button(null, new FontIcon(Feather.EDIT));
                 private final Button btnDelete = new Button(null, new FontIcon(Feather.TRASH));
 
-                private final HBox hBox = new HBox(10, btnView, btnAssign, btnEdit, btnDelete);
+                private final HBox hBox = new HBox(10, btnView, btnSellTicket, btnAssign, btnEdit, btnDelete);
                 {
                     Tooltip showToolTip = new Tooltip("Vis");
+                    Tooltip sellTicketToolTip = new Tooltip("Sælg billetter");
                     Tooltip assignToolTip = new Tooltip("Tildel");
                     Tooltip editToolTip = new Tooltip("Rediger");
                     Tooltip deleteToolTip = new Tooltip("Slet");
 
                     btnView.setTooltip(showToolTip);
+                    btnSellTicket.setTooltip(sellTicketToolTip);
                     btnAssign.setTooltip(assignToolTip);
                     btnEdit.setTooltip(editToolTip);
                     btnDelete.setTooltip(deleteToolTip);
 
                     btnView.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Styles.FLAT);
+                    btnSellTicket.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Styles.FLAT);
                     btnAssign.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Styles.FLAT);
                     btnEdit.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.ACCENT, Styles.FLAT);
 
@@ -262,6 +267,14 @@ public class EventController implements Initializable, IPageController {
                         EventItemModel item = getTableRow().getItem();
                         if (item != null)
                             goToEventItemPage(item);
+                    });
+
+                    btnSellTicket.setOnAction(event -> {
+                        EventItemModel item = getTableRow().getItem();
+                        if (item != null) {
+                            ticketInteractor.getSellTicketModel().eventModelProperty().set(item);
+                            ModalHandler.getInstance().getModalOverlay().showFXML(Modal.EVENT_SELL_TICKET);
+                        }
                     });
 
                     btnAssign.setOnAction(event -> {
@@ -287,16 +300,16 @@ public class EventController implements Initializable, IPageController {
                             String headerText = active ? "Bekræft slet af " + eventName : "Bekræft genaktivering af " + eventName;
                             String message = active ? "Bemærk, hvis du sletter dette, er eventet \"" + item.nameProperty().get() + "\" væk for altid. \n\nEr du sikker på at du vil fortsætte?" : "Bemærk, hvis du genaktiverer dette, vil eventet \"" + item.nameProperty().get() + "\" blive aktiv igen. \n\nEr du sikker på at du vil fortsætte?";
                             DialogHandler.showConfirmationDialog(
-                                            title,
-                                            headerText,
-                                            message,
-                                            () -> {
-                                                eventInteractor.changeEventStatus(item, wasChanged -> {
-                                                    if (wasChanged) {
-                                                        tblViewEvents.refresh();
-                                                    }
-                                                });
+                                    title,
+                                    headerText,
+                                    message,
+                                    () -> {
+                                        eventInteractor.changeEventStatus(item, wasChanged -> {
+                                            if (wasChanged) {
+                                                tblViewEvents.refresh();
                                             }
+                                        });
+                                    }
                             );
                         }});
 

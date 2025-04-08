@@ -12,7 +12,8 @@ public enum Modal {
     TICKET_EDIT_EVENT("/fxml/modals/TicketEditEvent.fxml"),
     USERS("/fxml/pages/UserPage.fxml"),
     USER_ADD_NEW("/fxml/modals/UserAddNew.fxml"),
-    USER_EDIT("/fxml/modals/UserEdit.fxml");
+    USER_EDIT("/fxml/modals/UserEdit.fxml"),
+    EVENT_SELL_TICKET("/fxml/modals/SellTicketEvent.fxml");
 
     private final String path;
     private Object controller;

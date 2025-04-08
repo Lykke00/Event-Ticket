@@ -6,6 +6,7 @@ import easv.event.be.TicketEvent;
 import easv.event.be.TicketType;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ITicketDAO {
     Ticket createTicket(Ticket ticket) throws Exception;
@@ -35,4 +36,12 @@ public interface ITicketDAO {
     List<TicketEvent> addTicketToEvent(TicketEvent ticket, List<Event> eventsToAdd, List<Event> eventsToRemove) throws Exception;
 
     List<TicketEvent> getTicketEventByTicket(Ticket ticket) throws Exception;
+
+    boolean editTicketEvent(TicketEvent entity) throws Exception;
+
+    boolean removeTicketEvent(TicketEvent entity) throws Exception;
+
+    List<TicketEvent> getTicketEventByEvent(Event event) throws Exception;
+
+    boolean sellTicket(TicketEvent ticket, UUID uuid, int amount, String email) throws Exception;
 }

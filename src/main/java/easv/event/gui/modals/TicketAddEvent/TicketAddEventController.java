@@ -20,10 +20,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.CheckComboBox;
 import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material2.Material2OutlinedAL;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -63,8 +65,7 @@ public class TicketAddEventController implements Initializable, IModalController
 
         txtFieldPriceOnlyNumbers();
         validate();
-
-        maskTxtFieldPrice.setLeft(new FontIcon(Feather.DOLLAR_SIGN));
+        updateMoneyField();
     }
 
     @Override
@@ -75,6 +76,38 @@ public class TicketAddEventController implements Initializable, IModalController
         ticketItemModel.databaseLoadingProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 updateEventComboBox(ticketItemModel.ticketItemModel());
+            }
+        });
+    }
+
+    private void updateMoneyField() {
+        maskTxtFieldPrice.setLeft(new FontIcon(Material2OutlinedAL.ACCOUNT_BALANCE));
+
+        String suffix = " DKK";
+        TextFormatter<String> formatter = new TextFormatter<>(change -> {
+            if (change.isContentChange()) {
+                String newText = change.getControlNewText();
+
+                if (newText.endsWith(suffix))
+                    newText = newText.substring(0, newText.length() - suffix.length());
+
+                if (!newText.matches("\\d*"))
+                    return null;
+
+                change.setText(newText + suffix);
+                change.setRange(0, change.getControlText().length());
+            }
+
+            return change;
+        });
+
+        maskTxtFieldPrice.setTextFormatter(formatter);
+        maskTxtFieldPrice.setPromptText("0" + suffix);
+
+        maskTxtFieldPrice.caretPositionProperty().addListener((obs, oldPos, newPos) -> {
+            int max = maskTxtFieldPrice.getText().length() - suffix.length();
+            if (newPos.intValue() > max) {
+                maskTxtFieldPrice.positionCaret(max);
             }
         });
     }
@@ -147,7 +180,8 @@ public class TicketAddEventController implements Initializable, IModalController
             }
         });
 
-        double price = Double.parseDouble(maskTxtFieldPrice.getText());
+        String oldPrice = maskTxtFieldPrice.getText().replaceAll("DKK", "");
+        double price = Double.parseDouble(oldPrice);
         ticketInteractor.addTicketToEvent(ticketItemModel.ticketItemModel(), price, addedEvents, removedEvents);
 
         ModalHandler.getInstance().hideModal();

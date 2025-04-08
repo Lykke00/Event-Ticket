@@ -9,6 +9,7 @@ import easv.event.gui.common.*;
 import easv.event.gui.modals.EditTicket.EditTicketModel;
 import easv.event.gui.modals.EditTicketType.EditTicketTypeModel;
 import easv.event.gui.modals.NewTicketType.NewTicketTypeModel;
+import easv.event.gui.modals.SellTicket.SellTicketModel;
 import easv.event.gui.pages.Ticket.ItemView.TicketItemViewModel;
 import easv.event.gui.pages.Ticket.TicketModel;
 import easv.event.gui.utils.BackgroundTaskExecutor;
@@ -17,6 +18,7 @@ import easv.event.gui.utils.NotificationHandler;
 import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -30,6 +32,7 @@ public class TicketInteractor {
     private final EditTicketTypeModel editTicketTypeModel;
     private final EditTicketModel editTicketModel;
     private final TicketItemViewModel ticketItemViewModel;
+    private final SellTicketModel sellTicketModel;
 
     public TicketInteractor() {
         this.ticketModel = new TicketModel();
@@ -38,6 +41,7 @@ public class TicketInteractor {
         this.editTicketTypeModel = new EditTicketTypeModel();
         this.editTicketModel = new EditTicketModel();
         this.ticketItemViewModel = new TicketItemViewModel();
+        this.sellTicketModel = new SellTicketModel();
 
         try {
             this.ticketManager = new TicketManager();
@@ -382,6 +386,94 @@ public class TicketInteractor {
         );
     }
 
+    public void editTicketEvent(TicketEventItemModel original, TicketEventItemModel updatedModel, Consumer<Boolean> callback) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        return ticketManager.editTicketEvent(updatedModel.toEntity());
+                    } catch (Exception e) {
+                        throw new RuntimeException("Database fejl ved forsøg på at redigere event billet", e);
+                    }
+                },
+                createdTicket -> {
+                    original.updateModel(updatedModel);
+                    NotificationHandler.getInstance().showNotification( "Event billetten " + original.ticketProperty().get().nameProperty().get() + " er blevet redigeret", NotificationHandler.NotificationType.SUCCESS);
+                    callback.accept(true);
+                },
+                exception -> {
+                    callback.accept(false);
+                    DialogHandler.showExceptionError("Database fejl", "Database fejl ved forsøg på at redigere event billet", exception);
+                }
+        );
+    }
+
+    public void removeTicketEvent(TicketEventItemModel ticketEventItemModel, Consumer<Boolean> callback) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        return ticketManager.removeTicketEvent(ticketEventItemModel.toEntity());
+                    } catch (Exception e) {
+                        throw new RuntimeException("Database fejl ved forsøg på at slette event billet", e);
+                    }
+                },
+                didDelete -> {
+                    callback.accept(didDelete);
+                    ticketItemViewModel.ticketEventsProperty().remove(ticketEventItemModel);
+                    NotificationHandler.getInstance().showNotification( "Event billetten " + ticketEventItemModel.ticketProperty().get().nameProperty().get() + " er blevet slettet", NotificationHandler.NotificationType.SUCCESS);
+                },
+                exception -> {
+                    callback.accept(false);
+                    DialogHandler.showExceptionError("Database fejl", "Kunne ikke slette event billet", exception);
+                }
+        );
+    }
+
+    public void getTicketEventByEvent(EventItemModel eventItemModel) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        return ticketManager.getTicketEventByEvent(EventItemModel.toEntity(eventItemModel));
+                    } catch (Exception e) {
+                        throw new RuntimeException("Database fejl ved forsøg på at få fat i event billetter for event", e);
+                    }
+                },
+                ticketEvents -> {
+                    List<TicketEventItemModel> ticketEventsModel = ticketEvents.stream()
+                            .map(TicketEventItemModel::fromEntity)
+                            .sorted(Comparator.comparingDouble(t -> t.priceProperty().get()))
+                            .toList();
+
+                    sellTicketModel.ticketEventItemModelListProperty().setAll(ticketEventsModel);
+                },
+                exception -> {
+                    DialogHandler.showExceptionError("Database fejl", "Kunne ikke få fat i event billetter for event", exception);
+                },
+                onLoading -> {
+                    sellTicketModel.databaseLoadingProperty().set(onLoading);
+                }
+        );
+    }
+
+    public void sellTicket(TicketEventItemModel selectedTicket, int amount, String email, Consumer<Boolean> callback) {
+        BackgroundTaskExecutor.execute(
+                () -> {
+                    try {
+                        return ticketManager.sellTicket(selectedTicket.toEntity(), amount, email);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Database fejl ved forsøg på at sælge billet", e);
+                    }
+                },
+                didSell -> {
+                    callback.accept(didSell);
+                    NotificationHandler.getInstance().showNotification( "Billet til " + selectedTicket.eventProperty().get().nameProperty().get() + " er blevet solgt til " + email, NotificationHandler.NotificationType.SUCCESS);
+                },
+                exception -> {
+                    callback.accept(false);
+                    DialogHandler.showExceptionError("Database fejl", "Kunne ikke sælge billet", exception);
+                }
+        );
+    }
+
     public TicketModel getTicketModel() {
         return ticketModel;
     }
@@ -405,4 +497,9 @@ public class TicketInteractor {
     public TicketItemViewModel getTicketItemViewModel() {
         return ticketItemViewModel;
     }
+
+    public SellTicketModel getSellTicketModel() {
+        return sellTicketModel;
+    }
+
 }

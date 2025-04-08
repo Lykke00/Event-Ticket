@@ -13,6 +13,13 @@ public class TicketEvent {
         this.price = price;
     }
 
+    public TicketEvent(int id, Event event, Ticket ticket, double ticketPrice) {
+        this.id = id;
+        this.event = event;
+        this.ticket = ticket;
+        this.price = ticketPrice;
+    }
+
     public TicketEvent(Ticket ticket, Event event, double price) {
         this.ticket = ticket;
         this.event = event;

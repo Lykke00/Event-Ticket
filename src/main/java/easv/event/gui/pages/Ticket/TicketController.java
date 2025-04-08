@@ -61,9 +61,6 @@ public class TicketController implements Initializable {
     private TableColumn<TicketItemModel, String> tblColType;
 
     @FXML
-    private TableColumn<TicketItemModel, Number> tblColEvents;
-
-    @FXML
     private CustomTextField txtFieldSearch;
 
     @FXML
@@ -174,10 +171,6 @@ public class TicketController implements Initializable {
                         cellData.getValue().typeProperty()
                 )
         );
-
-        tblColEvents.setCellValueFactory(cellData -> {
-            return Bindings.size(cellData.getValue().getTicketEventItemModels());
-        });
 
         TableColumn<TicketItemModel, Void> tblColActions = new TableColumn<>("");
 

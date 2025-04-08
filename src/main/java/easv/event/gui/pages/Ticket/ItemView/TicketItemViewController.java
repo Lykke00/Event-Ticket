@@ -56,6 +56,8 @@ public class TicketItemViewController implements Initializable, IPageController 
     @FXML
     private TableColumn<TicketEventItemModel, String> tblColTicketPrice;
 
+
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.load();
@@ -226,11 +228,15 @@ public class TicketItemViewController implements Initializable, IPageController 
                         TicketEventItemModel item = getTableRow().getItem();
                         if (item != null) {
                             DialogHandler.showConfirmationDialog(
-                                    "Fjern event fra billet",
-                                    "Bekræft fjernelse af billet fra " + item.eventProperty().get().nameProperty().get(),
-                                    "Bemærk, hvis du fjerner dette, vil alle købte billetter blive slettet fra \"" + item.eventProperty().get().nameProperty().get() + "\".\n\nEr du sikker på at du vil fortsætte?",
-                                    () -> MainModel.getInstance().getTicketItemViewModel().ticketItemModel().getTicketEventItemModels().remove(item));
-
+                                    "Bekræft slet Event",
+                                    "Bekræft slet af " + item.eventProperty().get().nameProperty().get(),
+                                    "Er du sikker på at du vil fortsætte?",
+                                    () -> {
+                                        ticketInteractor.removeTicketEvent(item, success -> {
+                                            if (success)
+                                                load();
+                                        });
+                                    });
                         }
                     });
 

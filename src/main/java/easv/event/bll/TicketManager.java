@@ -9,13 +9,10 @@ import easv.event.dal.dao.TicketDAO;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 public class TicketManager {
     private final ITicketDAO ticketDAO;
-
-    public TicketManager(ITicketDAO ticketDAO) {
-        this.ticketDAO = ticketDAO;
-    }
 
     public TicketManager() throws Exception {
         try {
@@ -79,5 +76,26 @@ public class TicketManager {
 
     public List<TicketEvent> getEventTicketsByTicket(Ticket ticket) throws Exception {
         return ticketDAO.getTicketEventByTicket(ticket);
+    }
+
+    public boolean editTicketEvent(TicketEvent entity) throws Exception {
+        return ticketDAO.editTicketEvent(entity);
+    }
+
+    public boolean removeTicketEvent(TicketEvent entity) throws Exception {
+        return ticketDAO.removeTicketEvent(entity);
+    }
+
+    public List<TicketEvent> getTicketEventByEvent(Event event) throws Exception {
+        return ticketDAO.getTicketEventByEvent(event);
+    }
+
+    public boolean sellTicket(TicketEvent ticket, int amount, String email) throws Exception {
+        UUID uuid = UUID.randomUUID();
+        boolean success = ticketDAO.sellTicket(ticket, uuid, amount, email);
+        if (success)
+            QRCodeManager.generateQrCode(ticket, uuid, email, amount);
+
+        return success;
     }
 }

@@ -6,20 +6,16 @@ import easv.event.be.Ticket;
 import easv.event.be.TicketEvent;
 import easv.event.be.TicketType;
 import easv.event.dal.DBConnector;
-import easv.event.dal.IDBConnector;
 
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class TicketDAO implements ITicketDAO {
-    private final IDBConnector dbConnector;
-
-    public TicketDAO(IDBConnector dbConnector) {
-        this.dbConnector = dbConnector;
-    }
+    private final DBConnector dbConnector;
 
     public TicketDAO() throws IOException {
         this.dbConnector = new DBConnector();
@@ -438,8 +434,10 @@ public class TicketDAO implements ITicketDAO {
         List<TicketEvent> tickets = new ArrayList<>();
 
         String query = """
-                SELECT events.*, ticket_events.id AS ticket_id, ticket_events.price AS ticket_price FROM ticket_events
+                SELECT events.*, tickets.id AS ticket_id, tickets.name AS ticket_name, tickets.type AS ticket_type, ticket_types.type AS tickettype_name, ticket_events.id AS ticketevent_id, ticket_events.price AS ticketevent_price FROM ticket_events
                 JOIN events ON ticket_events.event_id = events.id
+                JOIN tickets ON ticket_events.ticket_id = tickets.id
+                JOIN ticket_types ON tickets.type = ticket_types.id
                 WHERE ticket_events.ticket_id = ?
                 """;
 
@@ -458,17 +456,129 @@ public class TicketDAO implements ITicketDAO {
                 String location = rs.getString("location");
                 boolean active = rs.getBoolean("active");
 
+                int ticketeventId = rs.getInt("ticketevent_id");
+                double ticketeventPrice = rs.getDouble("ticketevent_price");
+
                 int ticketId = rs.getInt("ticket_id");
-                double ticketPrice = rs.getDouble("ticket_price");
+                String ticketName = rs.getString("ticket_name");
+                int ticketTypeId = rs.getInt("ticket_type");
+
+                String ticketTypename = rs.getString("tickettype_name");
+                TicketType ticketType = new TicketType(ticketTypeId, ticketTypename);
+
+                Ticket ticketObj = new Ticket(ticketId, ticketName, ticketType);
 
                 Event event = new Event(id, title, description, date, startsAt, location, active);
-                TicketEvent ticketEvent = new TicketEvent(ticketId, event, ticketPrice);
+                TicketEvent ticketEvent = new TicketEvent(ticketeventId, event, ticketObj, ticketeventPrice);
                 tickets.add(ticketEvent);
             }
 
             return tickets;
         } catch (Exception e) {
             throw new Exception("Kunne ikke hente alle events for billet i databasen", e);
+        }
+    }
+
+    @Override
+    public boolean editTicketEvent(TicketEvent entity) throws Exception {
+        String sql = "UPDATE ticket_events SET price = ? WHERE ticket_id = ? AND event_id = ?";
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDouble(1, entity.getPrice());
+            stmt.setInt(2, entity.getTicket().getId());
+            stmt.setInt(3, entity.getEvent().getId());
+
+            stmt.executeUpdate();
+
+            return true;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke redigere event billet i databasen");
+        }
+    }
+
+    @Override
+    public boolean removeTicketEvent(TicketEvent entity) throws Exception {
+        String sql = "DELETE FROM ticket_events WHERE ticket_id = ? AND event_id = ?";
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, entity.getTicket().getId());
+            stmt.setInt(2, entity.getEvent().getId());
+
+            stmt.executeUpdate();
+
+            return true;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke slette event billet i databasen");
+        }
+    }
+
+    @Override
+    public List<TicketEvent> getTicketEventByEvent(Event event) throws Exception {
+        List<TicketEvent> tickets = new ArrayList<>();
+
+        String query = """
+                SELECT events.*, tickets.id AS ticket_id, tickets.name AS ticket_name, tickets.type AS ticket_type, ticket_types.type AS tickettype_name, ticket_events.id AS ticketevent_id, ticket_events.price AS ticketevent_price FROM ticket_events
+                JOIN events ON ticket_events.event_id = events.id
+                JOIN tickets ON ticket_events.ticket_id = tickets.id
+                JOIN ticket_types ON tickets.type = ticket_types.id
+                WHERE ticket_events.event_id = ?
+                """;
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, event.getId());
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String title = rs.getString("title");
+                String description = rs.getString("description");
+                LocalDate date = rs.getDate("date").toLocalDate();
+                String startsAt = rs.getString("starts_at");
+                String location = rs.getString("location");
+                boolean active = rs.getBoolean("active");
+
+                int ticketeventId = rs.getInt("ticketevent_id");
+                double ticketeventPrice = rs.getDouble("ticketevent_price");
+
+                int ticketId = rs.getInt("ticket_id");
+                String ticketName = rs.getString("ticket_name");
+                int ticketTypeId = rs.getInt("ticket_type");
+
+                String ticketTypename = rs.getString("tickettype_name");
+                TicketType ticketType = new TicketType(ticketTypeId, ticketTypename);
+
+                Ticket ticketObj = new Ticket(ticketId, ticketName, ticketType);
+
+                Event eventObj = new Event(id, title, description, date, startsAt, location, active);
+                TicketEvent ticketEvent = new TicketEvent(ticketeventId, eventObj, ticketObj, ticketeventPrice);
+                tickets.add(ticketEvent);
+            }
+            return tickets;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke hente alle events for billet i databasen", e);
+        }
+    }
+
+    @Override
+    public boolean sellTicket(TicketEvent ticket, UUID uuid, int amount, String email) throws Exception {
+        String sql = "INSERT INTO tickets_bought (ticket_event_id, customer_email, amount, total_price, uuid) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, ticket.getId());
+            stmt.setString(2, email);
+            stmt.setInt(3, amount);
+            stmt.setDouble(4, ticket.getPrice() * amount);
+            stmt.setString(5, uuid.toString());
+
+            stmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            throw new Exception("Kunne ikke sælge billetten", e);
         }
     }
 }

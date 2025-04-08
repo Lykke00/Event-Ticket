@@ -8,11 +8,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="mainWindow" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.event.gui.MainController">
+<BorderPane fx:id="mainWindow" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.event.gui.MainController">
    <top>
       <HBox alignment="CENTER_LEFT" prefHeight="51.0" prefWidth="731.0" spacing="5.0" styleClass="header-tab-pane">
          <children>
-            <HBox fx:id="hBoxLogo" alignment="CENTER_LEFT" minWidth="-Infinity" prefHeight="50.0" prefWidth="79.0" spacing="10.0">
+            <HBox fx:id="hBoxLogo" alignment="CENTER_LEFT" minWidth="-Infinity" prefHeight="50.0" prefWidth="79.0">
                <children>
                   <ImageView fitHeight="32.0" fitWidth="78.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -24,7 +24,7 @@
                   <Insets />
                </HBox.margin>
                <padding>
-                  <Insets left="5.0" />
+                  <Insets left="10.0" />
                </padding>
             </HBox>
             <HBox fx:id="hBoxTabs" alignment="CENTER_RIGHT" prefHeight="52.0" prefWidth="195.0" spacing="30.0" HBox.hgrow="ALWAYS">
