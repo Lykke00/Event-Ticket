@@ -4,6 +4,8 @@ import easv.event.be.Event;
 import easv.event.be.Ticket;
 import easv.event.be.User;
 import easv.event.dal.DBConnector;
+import easv.event.dal.IDBConnector;
+
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
@@ -11,7 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO implements IUserDAO {
-    private final DBConnector dbConnector;
+    private final IDBConnector dbConnector;
+
+    public UserDAO(IDBConnector dbConnector) {
+        this.dbConnector = dbConnector;
+    }
+
 
     public UserDAO() throws IOException {
         this.dbConnector = new DBConnector();

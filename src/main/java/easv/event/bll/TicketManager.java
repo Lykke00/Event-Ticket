@@ -13,6 +13,10 @@ import java.util.List;
 public class TicketManager {
     private final ITicketDAO ticketDAO;
 
+    public TicketManager(ITicketDAO ticketDAO) {
+        this.ticketDAO = ticketDAO;
+    }
+
     public TicketManager() throws Exception {
         try {
             this.ticketDAO = new TicketDAO();

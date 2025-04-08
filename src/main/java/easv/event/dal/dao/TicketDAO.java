@@ -6,6 +6,7 @@ import easv.event.be.Ticket;
 import easv.event.be.TicketEvent;
 import easv.event.be.TicketType;
 import easv.event.dal.DBConnector;
+import easv.event.dal.IDBConnector;
 
 import java.io.IOException;
 import java.sql.*;
@@ -14,7 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TicketDAO implements ITicketDAO {
-    private final DBConnector dbConnector;
+    private final IDBConnector dbConnector;
+
+    public TicketDAO(IDBConnector dbConnector) {
+        this.dbConnector = dbConnector;
+    }
 
     public TicketDAO() throws IOException {
         this.dbConnector = new DBConnector();

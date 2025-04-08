@@ -14,6 +14,10 @@ public class UserManager {
     private final IUserDAO userDAO;
     private final static int BCRYPT_COST = 12;
 
+    public UserManager(IUserDAO userDAO) {
+        this.userDAO = userDAO;
+    }
+
     public UserManager() throws IOException {
         this.userDAO = new UserDAO();
     }

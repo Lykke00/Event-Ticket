@@ -4,6 +4,7 @@ package easv.event.dal.dao;
 import easv.event.be.Event;
 import easv.event.be.User;
 import easv.event.dal.DBConnector;
+import easv.event.dal.IDBConnector;
 
 import java.io.IOException;
 import java.sql.*;
@@ -12,7 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventDAO implements IEventDAO {
-    private final DBConnector dbConnector;
+    private final IDBConnector dbConnector;
+
+    public EventDAO(IDBConnector dbConnector) {
+        this.dbConnector = dbConnector;
+    }
 
     public EventDAO() throws IOException {
         this.dbConnector = new DBConnector();

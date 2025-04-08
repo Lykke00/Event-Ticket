@@ -11,6 +11,10 @@ import java.util.List;
 public class EventManager {
     private final IEventDAO eventDAO;
 
+    public EventManager(IEventDAO eventDAO) {
+        this.eventDAO = eventDAO;
+    }
+
     public EventManager() throws Exception {
         try {
             this.eventDAO = new EventDAO();

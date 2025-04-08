@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.Properties;
 
-public class DBConnector {
+public class DBConnector implements IDBConnector {
     //designate file path for db settings
     private static final String PROPERTIES_FILE = "config/config.settings";
     private SQLServerDataSource dataSource;
@@ -28,6 +28,7 @@ public class DBConnector {
         dataSource.setTrustServerCertificate(true);
     }
 
+    @Override
     public Connection getConnection() throws SQLServerException {
         return dataSource.getConnection();
     }
