@@ -366,6 +366,7 @@ public class TicketController implements Initializable {
         tblViewTicketTypes.getColumns().add(tblColActions);
     }
 
+    // test
     @FXML
     private void btnActionAddNewTicket(ActionEvent actionEvent) {
         ModalHandler.getInstance().getModalOverlay().showFXML(Modal.TICKET_ADD_NEW);
